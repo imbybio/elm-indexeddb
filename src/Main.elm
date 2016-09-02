@@ -8,11 +8,11 @@ main =
 
 -- MODEL
 
-type alias Model = Int
+type alias Model = String
 
 model : Model
 model =
-  0
+  "Hello World!"
 
 -- UPDATE
 
@@ -29,4 +29,4 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div [] [ text "Hello!" ]
+  div [] [ text model ]
