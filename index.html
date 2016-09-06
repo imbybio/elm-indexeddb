@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>imby.bio • web app</title>
+  <script type="text/javascript" src="elm.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+</body>
+
+<script type="text/javascript">
+var app = Elm.Main.fullscreen();
+
+var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+
+app.ports.openDb.subscribe(function(dbname, dbvsn) {
+    var request = indexedDB.open(dbname, dbvsn);
+    request.onerror = function(event) {
+      app.ports.openDbOnError.send(event);
+    }
+    request.onsuccess = function(event) {
+      app.ports.openDbOnSuccess.send(event);
+    }
+    request.onupgradeneeded = function(event) {
+      app.ports.openDbOnUpgradeNeeded.send(event);
+    }
+});
+</script>
+
+</html>

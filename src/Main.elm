@@ -4,25 +4,30 @@ import Html exposing (..)
 import Html.App as App
 
 main =
-  App.beginnerProgram { model = model, view = view, update = update }
+  App.program
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }
 
 -- MODEL
 
 type alias Model = String
 
-model : Model
-model =
-  "Hello World!"
+init : (Model, Cmd Msg)
+init =
+  "Hello World!" ! []
 
 -- UPDATE
 
 type Msg =
   NoOp
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NoOp -> model
+    NoOp -> model ! []
 
 
 -- VIEW
@@ -30,3 +35,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div [] [ text model ]
+
+-- SUBSCRIPTIONS
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
