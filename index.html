@@ -16,8 +16,8 @@ var app = Elm.Main.fullscreen();
 
 var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 
-app.ports.openDb.subscribe(function(dbname, dbvsn) {
-    var request = indexedDB.open(dbname, dbvsn);
+app.ports.openDb.subscribe(function(dbname) {
+    var request = indexedDB.open(dbname);
     request.onerror = function(event) {
       app.ports.openDbOnError.send(event);
     }
