@@ -17,12 +17,12 @@ main =
 -- MODEL
 
 type alias Model =
-  { message : String
+  { messages : List String
   }
 
 init : (Model, Cmd Msg)
 init =
-  { message = "Hello World!"
+  { messages = []
   } ! []
 
 -- UPDATE
@@ -42,19 +42,19 @@ update msg model =
     NoOp -> model ! []
     OpenDb dbname ->
       { model
-        | message = ("Opening DB "++dbname)
+        | messages = ("Opening DB "++dbname) :: model.messages
       } ! [ openDb dbname ]
     OpenDbOnError ev ->
       { model
-        | message = ("Received error: "++(toString ev))
+        | messages = ("Received error: "++(toString ev)) :: model.messages
       } ! []
     OpenDbOnSuccess ev ->
       { model
-        | message = ("Received success: "++(toString ev))
+        | messages = ("Received success: "++(toString ev)) :: model.messages
       } ! []
     OpenDbOnUpgradeNeeded ev ->
       { model
-        | message = ("Received upgrade needed: "++(toString ev))
+        | messages = ("Received upgrade needed: "++(toString ev)) :: model.messages
       } ! []
 
 -- VIEW
@@ -70,7 +70,8 @@ view model =
       , onClick (OpenDb "testdb")
       ]
       []
-    , p [] [ text model.message ]
+    , ol []
+      (List.map (\m -> li [] [ text m ]) model.messages)
     ]
 
 -- SUBSCRIPTIONS
