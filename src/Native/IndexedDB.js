@@ -32,7 +32,7 @@ function open(dbname, dbvsn, upgradeneededcallback)
     });
 }
 
-function createObjectStore(db, osname, osopts)
+function dbCreateObjectStore(db, osname, osopts)
 {
     var josopts = {
         autoIncrement: osopts.auto_increment
@@ -43,7 +43,7 @@ function createObjectStore(db, osname, osopts)
     return toObjectStore(db.createObjectStore(osname, josopts));
 }
 
-function transaction(db, snames, mode)
+function dbTransaction(db, snames, mode)
 {
     var jsnames = _elm_lang$core$Native_List.toArray(snames);
     var tmode = 'readonly';
@@ -176,7 +176,6 @@ function toTransaction(t) {
         tctor = 'ReadWrite';
     }
     return {
-        db: toDatabase(t.db),
         mode: { ctor: tctor },
         object_store_names: t.objectStoreNames,
         handle: t
@@ -185,8 +184,8 @@ function toTransaction(t) {
 
 return {
     open: F3(open),
-    createObjectStore: F3(createObjectStore),
-    transaction: F3(transaction),
+    dbCreateObjectStore: F3(dbCreateObjectStore),
+    dbTransaction: F3(dbTransaction),
     transactionObjectStore: F2(transactionObjectStore),
     objectStoreAdd: F3(objectStoreAdd),
     objectStorePut: F3(objectStorePut),

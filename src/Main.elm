@@ -8,6 +8,10 @@ import Json.Decode as Json
 import Task
 
 import IndexedDB
+import IndexedDB.Database as Database
+import IndexedDB.Transaction as Transaction
+import IndexedDB.ObjectStore as ObjectStore
+import IndexedDB.Error as Error
 
 main =
   App.program
@@ -21,7 +25,7 @@ main =
 
 type alias Model =
   { messages : List String
-  , db : Maybe IndexedDB.Database
+  , db : Maybe Database.Database
   , data_entry_field : String
   , data_key_field : String
   , data : List DataEntry
@@ -46,18 +50,18 @@ type alias DataEntry =
 type Msg
   = NoOp
   | OpenDb String Int
-  | OpenDbOnError IndexedDB.Error
-  | OpenDbOnSuccess IndexedDB.Database
+  | OpenDbOnError Error.Error
+  | OpenDbOnSuccess Database.Database
   | UpdateDataEntryField String
   | Add String
-  | AddOnError IndexedDB.Error
+  | AddOnError Error.Error
   | AddOnSuccess String Int
   | Delete Int
-  | DeleteOnError IndexedDB.Error
+  | DeleteOnError Error.Error
   | DeleteOnSuccess Int
   | UpdateDataKeyField String
   | Get String
-  | GetOnError IndexedDB.Error
+  | GetOnError Error.Error
   | GetOnSuccess Int (Maybe String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -254,39 +258,39 @@ openDb dbname dbvsn =
 onVersionChange : IndexedDB.VersionChangeEvent -> Bool
 onVersionChange evt =
   let
-    os = IndexedDB.createObjectStore "data" {key_path = Nothing, auto_increment = True} evt.db
+    os = Database.createObjectStore "data" {key_path = Nothing, auto_increment = True} evt.db
   in
     True
 
-addItem : String -> IndexedDB.Database -> Cmd Msg
+addItem : String -> Database.Database -> Cmd Msg
 addItem value db =
   let
     os =
       db
-      |> IndexedDB.transaction ["data"] IndexedDB.ReadWrite
-      |> IndexedDB.transactionObjectStore "data"
+      |> Database.transaction ["data"] Transaction.ReadWrite
+      |> Transaction.objectStore "data"
   in
-    Task.perform AddOnError (AddOnSuccess value) (IndexedDB.objectStoreAdd value Nothing os)
+    Task.perform AddOnError (AddOnSuccess value) (ObjectStore.add value Nothing os)
 
-deleteItem : Int -> IndexedDB.Database -> Cmd Msg
+deleteItem : Int -> Database.Database -> Cmd Msg
 deleteItem key db =
   let
     os =
       db
-      |> IndexedDB.transaction ["data"] IndexedDB.ReadWrite
-      |> IndexedDB.transactionObjectStore "data"
+      |> Database.transaction ["data"] Transaction.ReadWrite
+      |> Transaction.objectStore "data"
   in
-    Task.perform DeleteOnError DeleteOnSuccess (IndexedDB.objectStoreDelete key os)
+    Task.perform DeleteOnError DeleteOnSuccess (ObjectStore.delete key os)
 
-getItem : Int -> IndexedDB.Database -> Cmd Msg
+getItem : Int -> Database.Database -> Cmd Msg
 getItem key db =
   let
     os =
       db
-      |> IndexedDB.transaction ["data"] IndexedDB.ReadWrite
-      |> IndexedDB.transactionObjectStore "data"
+      |> Database.transaction ["data"] Transaction.ReadOnly
+      |> Transaction.objectStore "data"
   in
-    Task.perform GetOnError (GetOnSuccess key) (IndexedDB.objectStoreGet key os)
+    Task.perform GetOnError (GetOnSuccess key) (ObjectStore.get key os)
 
 decodeKey : String -> Result String Int
 decodeKey str =
