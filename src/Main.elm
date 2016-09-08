@@ -38,6 +38,7 @@ type Msg
   | OpenDb String Int
   | OpenDbOnError IndexedDB.Error
   | OpenDbOnSuccess IndexedDB.Database
+  | OpenStore String
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -56,20 +57,57 @@ update msg model =
         | messages = ("Received success: "++(toString db)) :: model.messages
         , db = Just db
       } ! []
+    OpenStore osname ->
+      let
+        m_t = case model.db of
+          Nothing -> Nothing
+          Just db -> Just (IndexedDB.transaction osname IndexedDB.ReadOnly db)
+        m_os = case m_t of
+          Nothing -> Nothing
+          Just t -> Just (IndexedDB.transactionObjectStore osname t)
+      in
+        { model
+          | messages = ("Opened store "++osname++": "++(toString m_os)) :: model.messages
+        } ! []
 
 -- VIEW
 
 view : Model -> Html Msg
 view model =
   div []
-    [ input
-      [ id "opendb"
-      , name "opendb"
-      , type' "submit"
-      , value "Open DB"
-      , onClick (OpenDb "testdb" 1)
-      ]
-      []
+    [ (
+        case model.db of
+          Nothing ->
+            div []
+              [ input
+                [ id "opendb"
+                , name "opendb"
+                , type' "submit"
+                , value "Open DB"
+                , onClick (OpenDb "testdb" 1)
+                ]
+                []
+              ]
+          Just jdb ->
+            div []
+              [ input
+                [ id "opendb"
+                , name "opendb"
+                , type' "submit"
+                , value "Open DB (done)"
+                , disabled True
+                ]
+                []
+              , input
+                [ id "openstore"
+                , name "openstore"
+                , type' "submit"
+                , value "Open Store"
+                , onClick (OpenStore "data")
+                ]
+                []
+              ]
+      )
     , ol []
       (List.map (\m -> li [] [ text m ]) model.messages)
     ]

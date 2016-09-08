@@ -40,6 +40,17 @@ type alias ObjectStoreOptions =
   , auto_increment: Bool
   }
 
+type alias Transaction =
+  { db: Database
+  , mode: TransactionMode
+  , object_store_names: List String
+  , handle: Json.Value
+  }
+
+type TransactionMode
+  = ReadOnly
+  | ReadWrite
+
 {-| Open a database given its name and version.
 -}
 open : String -> Int -> (VersionChangeEvent -> Bool) -> Task Error Database
@@ -51,3 +62,15 @@ open dbname dbvsn onvsnchange =
 createObjectStore : String -> ObjectStoreOptions -> Database -> ObjectStore
 createObjectStore osname osopts db =
   Native.IndexedDB.createObjectStore db.handle osname osopts
+
+{-| Create a transaction to perform operations on the database
+-}
+transaction : String -> TransactionMode -> Database -> Transaction
+transaction sname mode db =
+  Native.IndexedDB.transaction db.handle sname mode
+
+{-| Get an object store from a transaction
+-}
+transactionObjectStore : String -> Transaction -> ObjectStore
+transactionObjectStore osname transaction =
+  Native.IndexedDB.transactionObjectStore transaction.handle osname

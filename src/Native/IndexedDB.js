@@ -21,11 +21,10 @@ function open(dbname, dbvsn, upgradeneededcallback)
         req.addEventListener('upgradeneeded', function(evt) {
             upgradeneededcallback(toVersionchangeEvent(evt))
             // TODO: handle the result of that function
+            // one option could be abort if false
         });
-        req.addEventListener('success', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(
-                { ctor: 'Success', _0: toDatabase(evt.target.result) }
-                ));
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(toDatabase(req.result)));
         });
 
         return function() {
@@ -35,7 +34,29 @@ function open(dbname, dbvsn, upgradeneededcallback)
 
 function createObjectStore(db, osname, osopts)
 {
-    return toObjectStore(db.createObjectStore(osname, osopts));
+    var josopts = {
+        autoIncrement: osopts.auto_increment
+    };
+    if (osopts.key_path.ctor == 'Just') {
+        josopts.keyPath = osopts.key_path._0;
+    }
+    return toObjectStore(db.createObjectStore(osname, josopts));
+}
+
+function transaction(db, sname, mode)
+{
+    var tmode = 'readonly';
+    if (mode.ctor == 'ReadWrite') {
+        tmode = 'readwrite';
+    }
+    return toTransaction(db.transaction(sname, tmode));
+}
+
+function transactionObjectStore(t, osname)
+{
+    // TODO handle exception that can be thrown by this method,
+    // should return a Result type
+    return toObjectStore(t.objectStore(osname));
 }
 
 function toVersionchangeEvent(evt) {
@@ -63,9 +84,25 @@ function toObjectStore(os) {
     }
 }
 
+function toTransaction(t) {
+    // readwriteflush is Firefox specific, mapping to ReadWrite
+    var tctor = 'ReadOnly';
+    if (t.mode == 'readwrite' || t.mode == 'readwriteflush') {
+        tctor = 'ReadWrite';
+    }
+    return {
+        db: toDatabase(t.db),
+        mode: { ctor: tctor },
+        object_store_names: t.objectStoreNames,
+        handle: t
+    }
+}
+
 return {
     open: F3(open),
-    createObjectStore: F3(createObjectStore)
+    createObjectStore: F3(createObjectStore),
+    transaction: F3(transaction),
+    transactionObjectStore: F2(transactionObjectStore)
 };
 
 }();
