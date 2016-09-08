@@ -177,7 +177,7 @@ function toTransaction(t) {
     }
     return {
         mode: { ctor: tctor },
-        object_store_names: t.objectStoreNames,
+        object_store_names: _elm_lang$core$Native_List.fromArray(t.objectStoreNames),
         handle: t
     }
 }
