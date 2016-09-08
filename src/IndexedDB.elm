@@ -75,8 +75,26 @@ transactionObjectStore : String -> Transaction -> ObjectStore
 transactionObjectStore osname transaction =
   Native.IndexedDB.transactionObjectStore transaction.handle osname
 
-{-| Add an item to an object store
+{-| Add an item to an object store, will fail if the key already exists
 -}
-objectStoreAdd : item -> Maybe key -> ObjectStore -> Task Error key
-objectStoreAdd item m_key os =
-  Native.IndexedDB.objectStoreAdd os.handle item m_key
+objectStoreAdd : value -> Maybe key -> ObjectStore -> Task Error key
+objectStoreAdd value m_key os =
+  Native.IndexedDB.objectStoreAdd os.handle value m_key
+
+{-| Put an item into an object store, in effect doing a add or update
+-}
+objectStorePut : value -> Maybe key -> ObjectStore -> Task Error key
+objectStorePut value m_key os =
+  Native.IndexedDB.objectStorePut os.handle value m_key
+
+{-| Delete an item from an object store
+-}
+objectStoreDelete : key -> ObjectStore -> Task Error key
+objectStoreDelete key os =
+  Native.IndexedDB.objectStoreDelete os.handle key
+
+{-| Get an item from an object store
+-}
+objectStoreGet : key -> ObjectStore -> Task Error value
+objectStoreGet key os =
+  Native.IndexedDB.objectStoreGet os.handle key

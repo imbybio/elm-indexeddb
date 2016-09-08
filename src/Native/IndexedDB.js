@@ -82,6 +82,65 @@ function objectStoreAdd(os, item, key)
     });
 }
 
+function objectStorePut(os, item, key)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkey = null;
+        if (key.ctor == 'Just') {
+            jkey = key._0;
+        }
+        var req = os.put(item, jkey)
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(
+                { ctor: 'Error', _0: evt }
+                ));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function objectStoreDelete(os, key)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = os.delete(key)
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(
+                { ctor: 'Error', _0: evt }
+                ));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(key));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function objectStoreGet(os, key)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = os.get(key)
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(
+                { ctor: 'Error', _0: evt }
+                ));
+        });
+        req.addEventListener('success', function() {
+            console.log(req.result)
+            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+        });
+
+        return function() {
+        };
+    });
+}
+
 function toVersionchangeEvent(evt) {
     return {
         old_version: evt.oldVersion,
@@ -126,7 +185,10 @@ return {
     createObjectStore: F3(createObjectStore),
     transaction: F3(transaction),
     transactionObjectStore: F2(transactionObjectStore),
-    objectStoreAdd: F3(objectStoreAdd)
+    objectStoreAdd: F3(objectStoreAdd),
+    objectStorePut: F3(objectStorePut),
+    objectStoreDelete: F2(objectStoreDelete),
+    objectStoreGet: F2(objectStoreGet)
 };
 
 }();
