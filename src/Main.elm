@@ -63,6 +63,8 @@ type Msg
   | Get String
   | GetOnError Error.Error
   | GetOnSuccess Int (Maybe String)
+  | BadTransaction
+  | BadObjectStore
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -155,6 +157,41 @@ update msg model =
             | data = List.append model.data [DataEntry key value]
           } ! []
         Nothing -> model ! []
+    BadTransaction ->
+      case model.db of
+        Nothing -> model ! []
+        Just db ->
+          let
+            r_trx = Database.transaction ["dummy"] Transaction.ReadOnly db
+          in
+            case r_trx of
+              Result.Ok trx ->
+                { model
+                  | messages = ("Unexpected transaction: "++(toString trx)) :: model.messages
+                } ! []
+              Result.Err err ->
+                { model
+                  | messages = ("Transaction error: "++(toString err)) :: model.messages
+                } ! []
+    BadObjectStore ->
+      case model.db of
+        Nothing -> model ! []
+        Just db ->
+          let
+            r_os =
+              Result.andThen
+              (Database.transaction ["data"] Transaction.ReadOnly db)
+              (Transaction.objectStore "dummy")
+          in
+            case r_os of
+              Result.Ok os ->
+                { model
+                  | messages = ("Unexpected object store: "++(toString os)) :: model.messages
+                } ! []
+              Result.Err err ->
+                { model
+                  | messages = ("Object store error: "++(toString err)) :: model.messages
+                } ! []
 
 -- VIEW
 
@@ -168,6 +205,24 @@ view model =
       , value "Open DB"
       , disabled (if model.db == Nothing then False else True)
       , onClick (OpenDb "testdb" 1)
+      ]
+      []
+    , input
+      [ id "badtrx"
+      , name "badtrx"
+      , type' "submit"
+      , value "Bad Transaction"
+      , disabled (if model.db == Nothing then True else False)
+      , onClick BadTransaction
+      ]
+      []
+    , input
+      [ id "bados"
+      , name "bados"
+      , type' "submit"
+      , value "Bad Object Store"
+      , disabled (if model.db == Nothing then True else False)
+      , onClick BadObjectStore
       ]
       []
     , h2 [] [ text "Objects" ]
@@ -291,7 +346,7 @@ getItem key db =
   let
     r_os =
       Result.andThen
-      (Database.transaction ["data"] Transaction.ReadWrite db)
+      (Database.transaction ["data"] Transaction.ReadOnly db)
       (Transaction.objectStore "data")
   in
     Task.perform GetOnError (GetOnSuccess key) (
