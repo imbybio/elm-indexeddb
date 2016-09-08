@@ -265,32 +265,38 @@ onVersionChange evt =
 addItem : String -> Database.Database -> Cmd Msg
 addItem value db =
   let
-    os =
-      db
-      |> Database.transaction ["data"] Transaction.ReadWrite
-      |> Transaction.objectStore "data"
+    r_os =
+      Result.andThen
+      (Database.transaction ["data"] Transaction.ReadWrite db)
+      (Transaction.objectStore "data")
   in
-    Task.perform AddOnError (AddOnSuccess value) (ObjectStore.add value Nothing os)
+    Task.perform AddOnError (AddOnSuccess value) (
+      Task.fromResult r_os `Task.andThen` (ObjectStore.add value Nothing)
+      )
 
 deleteItem : Int -> Database.Database -> Cmd Msg
 deleteItem key db =
   let
-    os =
-      db
-      |> Database.transaction ["data"] Transaction.ReadWrite
-      |> Transaction.objectStore "data"
+    r_os =
+      Result.andThen
+      (Database.transaction ["data"] Transaction.ReadWrite db)
+      (Transaction.objectStore "data")
   in
-    Task.perform DeleteOnError DeleteOnSuccess (ObjectStore.delete key os)
+    Task.perform DeleteOnError DeleteOnSuccess (
+      Task.fromResult r_os `Task.andThen` (ObjectStore.delete key)
+      )
 
 getItem : Int -> Database.Database -> Cmd Msg
 getItem key db =
   let
-    os =
-      db
-      |> Database.transaction ["data"] Transaction.ReadOnly
-      |> Transaction.objectStore "data"
+    r_os =
+      Result.andThen
+      (Database.transaction ["data"] Transaction.ReadWrite db)
+      (Transaction.objectStore "data")
   in
-    Task.perform GetOnError (GetOnSuccess key) (ObjectStore.get key os)
+    Task.perform GetOnError (GetOnSuccess key) (
+      Task.fromResult r_os `Task.andThen` (ObjectStore.get key)
+      )
 
 decodeKey : String -> Result String Int
 decodeKey str =

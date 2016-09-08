@@ -50,14 +50,40 @@ function dbTransaction(db, snames, mode)
     if (mode.ctor == 'ReadWrite') {
         tmode = 'readwrite';
     }
-    return toTransaction(db.transaction(jsnames, tmode));
+    try {
+        return {
+            ctor: 'Ok',
+            _0: toTransaction(db.transaction(jsnames, tmode))
+        };
+    }
+    catch(err) {
+        return {
+            ctor: 'Err',
+            _0: {
+                ctor: 'Error',
+                _0: err
+            }
+        };
+    }
 }
 
 function transactionObjectStore(t, osname)
 {
-    // TODO handle exception that can be thrown by this method,
-    // should return a Result type
-    return toObjectStore(t.objectStore(osname));
+    try {
+        return {
+            ctor: 'Ok',
+            _0: toObjectStore(t.objectStore(osname))
+        };
+    }
+    catch(err) {
+        return {
+            ctor: 'Err',
+            _0: {
+                ctor: 'Error',
+                _0: err
+            }
+        };
+    }
 }
 
 function objectStoreAdd(os, item, key)
