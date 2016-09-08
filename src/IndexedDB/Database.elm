@@ -21,10 +21,10 @@ type alias Database =
 -}
 createObjectStore : String -> ObjectStoreOptions -> Database -> ObjectStore
 createObjectStore osname osopts db =
-  Native.IndexedDB.dbCreateObjectStore db.handle osname osopts
+  Native.IndexedDB.databaseCreateObjectStore db.handle osname osopts
 
 {-| Create a transaction to perform operations on the database
 -}
 transaction : List String -> TransactionMode -> Database -> Result Error Transaction
 transaction snames mode db =
-  Native.IndexedDB.dbTransaction db.handle snames mode
+  Native.IndexedDB.databaseTransaction db.handle snames mode
