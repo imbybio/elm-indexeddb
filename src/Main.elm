@@ -1,10 +1,14 @@
-port module Main exposing (..)
+--port module Main exposing (..)
+module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing(onClick)
 import Html.App as App
 import Json.Decode as Json
+import Task
+
+import IndexedDB
 
 main =
   App.program
@@ -18,43 +22,39 @@ main =
 
 type alias Model =
   { messages : List String
+  , db : Maybe IndexedDB.Database
   }
 
 init : (Model, Cmd Msg)
 init =
   { messages = []
+  , db = Nothing
   } ! []
 
 -- UPDATE
 
 type Msg
   = NoOp
-  | OpenDb String
-  | OpenDbOnError Json.Value
-  | OpenDbOnSuccess Json.Value
-  | OpenDbOnUpgradeNeeded Json.Value
-
-port openDb : String -> Cmd msg
+  | OpenDb String Int
+  | OpenDbOnError IndexedDB.Error
+  | OpenDbOnSuccess IndexedDB.Database
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     NoOp -> model ! []
-    OpenDb dbname ->
+    OpenDb dbname dbvsn ->
       { model
-        | messages = ("Opening DB "++dbname) :: model.messages
-      } ! [ openDb dbname ]
+        | messages = ("Opening DB "++dbname++" version "++(toString dbvsn)) :: model.messages
+      } ! [ (openDb dbname dbvsn) ]
     OpenDbOnError ev ->
       { model
         | messages = ("Received error: "++(toString ev)) :: model.messages
       } ! []
-    OpenDbOnSuccess ev ->
+    OpenDbOnSuccess db ->
       { model
-        | messages = ("Received success: "++(toString ev)) :: model.messages
-      } ! []
-    OpenDbOnUpgradeNeeded ev ->
-      { model
-        | messages = ("Received upgrade needed: "++(toString ev)) :: model.messages
+        | messages = ("Received success: "++(toString db)) :: model.messages
+        , db = Just db
       } ! []
 
 -- VIEW
@@ -67,7 +67,7 @@ view model =
       , name "opendb"
       , type' "submit"
       , value "Open DB"
-      , onClick (OpenDb "testdb")
+      , onClick (OpenDb "testdb" 1)
       ]
       []
     , ol []
@@ -76,16 +76,19 @@ view model =
 
 -- SUBSCRIPTIONS
 
-port openDbOnError : (Json.Value -> msg) -> Sub msg
-
-port openDbOnSuccess : (Json.Value -> msg) -> Sub msg
-
-port openDbOnUpgradeNeeded : (Json.Value -> msg) -> Sub msg
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.batch [
-    openDbOnError OpenDbOnError,
-    openDbOnSuccess OpenDbOnSuccess,
-    openDbOnUpgradeNeeded OpenDbOnUpgradeNeeded
-  ]
+  Sub.none
+
+-- IndexedDB
+
+openDb : String -> Int -> Cmd Msg
+openDb dbname dbvsn =
+  Task.perform OpenDbOnError OpenDbOnSuccess (IndexedDB.open dbname dbvsn onVersionChange)
+
+onVersionChange : IndexedDB.VersionChangeEvent -> Bool
+onVersionChange evt =
+  let
+    os = IndexedDB.createObjectStore "data" {key_path = Nothing, auto_increment = True} evt.db
+  in
+    True
