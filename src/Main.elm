@@ -58,7 +58,7 @@ type Msg
   | UpdateDataKeyField String
   | Get String
   | GetOnError IndexedDB.Error
-  | GetOnSuccess Int String
+  | GetOnSuccess Int (Maybe String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -144,10 +144,13 @@ update msg model =
       { model
         | messages = ("Received error: "++(toString ev)) :: model.messages
       } ! []
-    GetOnSuccess key value ->
-      { model
-        | data = List.append model.data [DataEntry key value]
-      } ! []
+    GetOnSuccess key m_value ->
+      case m_value of
+        Just value ->
+          { model
+            | data = List.append model.data [DataEntry key value]
+          } ! []
+        Nothing -> model ! []
 
 -- VIEW
 

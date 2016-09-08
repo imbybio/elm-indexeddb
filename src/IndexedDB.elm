@@ -95,6 +95,6 @@ objectStoreDelete key os =
 
 {-| Get an item from an object store
 -}
-objectStoreGet : key -> ObjectStore -> Task Error value
+objectStoreGet : key -> ObjectStore -> Task Error (Maybe value)
 objectStoreGet key os =
   Native.IndexedDB.objectStoreGet os.handle key

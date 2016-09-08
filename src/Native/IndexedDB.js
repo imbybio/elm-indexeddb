@@ -132,8 +132,11 @@ function objectStoreGet(os, key)
                 ));
         });
         req.addEventListener('success', function() {
-            console.log(req.result)
-            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+            var eresult = { ctor: 'Nothing' }
+            if (req.result != null) {
+                eresult = { ctor: 'Just', _0: req.result }
+            }
+            return callback(_elm_lang$core$Native_Scheduler.succeed(eresult));
         });
 
         return function() {
