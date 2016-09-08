@@ -65,12 +65,18 @@ createObjectStore osname osopts db =
 
 {-| Create a transaction to perform operations on the database
 -}
-transaction : String -> TransactionMode -> Database -> Transaction
-transaction sname mode db =
-  Native.IndexedDB.transaction db.handle sname mode
+transaction : List String -> TransactionMode -> Database -> Transaction
+transaction snames mode db =
+  Native.IndexedDB.transaction db.handle snames mode
 
 {-| Get an object store from a transaction
 -}
 transactionObjectStore : String -> Transaction -> ObjectStore
 transactionObjectStore osname transaction =
   Native.IndexedDB.transactionObjectStore transaction.handle osname
+
+{-| Add an item to an object store
+-}
+objectStoreAdd : item -> Maybe key -> ObjectStore -> Task Error key
+objectStoreAdd item m_key os =
+  Native.IndexedDB.objectStoreAdd os.handle item m_key

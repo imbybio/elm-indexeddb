@@ -43,13 +43,14 @@ function createObjectStore(db, osname, osopts)
     return toObjectStore(db.createObjectStore(osname, josopts));
 }
 
-function transaction(db, sname, mode)
+function transaction(db, snames, mode)
 {
+    var jsnames = _elm_lang$core$Native_List.toArray(snames);
     var tmode = 'readonly';
     if (mode.ctor == 'ReadWrite') {
         tmode = 'readwrite';
     }
-    return toTransaction(db.transaction(sname, tmode));
+    return toTransaction(db.transaction(jsnames, tmode));
 }
 
 function transactionObjectStore(t, osname)
@@ -57,6 +58,28 @@ function transactionObjectStore(t, osname)
     // TODO handle exception that can be thrown by this method,
     // should return a Result type
     return toObjectStore(t.objectStore(osname));
+}
+
+function objectStoreAdd(os, item, key)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkey = null;
+        if (key.ctor == 'Just') {
+            jkey = key._0;
+        }
+        var req = os.add(item, jkey)
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(
+                { ctor: 'Error', _0: evt }
+                ));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+        });
+
+        return function() {
+        };
+    });
 }
 
 function toVersionchangeEvent(evt) {
@@ -102,7 +125,8 @@ return {
     open: F3(open),
     createObjectStore: F3(createObjectStore),
     transaction: F3(transaction),
-    transactionObjectStore: F2(transactionObjectStore)
+    transactionObjectStore: F2(transactionObjectStore),
+    objectStoreAdd: F3(objectStoreAdd)
 };
 
 }();

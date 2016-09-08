@@ -3,7 +3,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing(onClick)
+import Html.Events exposing(onClick, onInput)
 import Html.App as App
 import Json.Decode as Json
 import Task
@@ -23,13 +23,22 @@ main =
 type alias Model =
   { messages : List String
   , db : Maybe IndexedDB.Database
+  , data_entry_field : String
+  , data : List DataEntry
   }
 
 init : (Model, Cmd Msg)
 init =
   { messages = []
   , db = Nothing
+  , data_entry_field = ""
+  , data = []
   } ! []
+
+type alias DataEntry =
+  { id : Int
+  , value : String
+  }
 
 -- UPDATE
 
@@ -38,7 +47,10 @@ type Msg
   | OpenDb String Int
   | OpenDbOnError IndexedDB.Error
   | OpenDbOnSuccess IndexedDB.Database
-  | OpenStore String
+  | UpdateDataEntryField String
+  | Add String
+  | AddOnError IndexedDB.Error
+  | AddOnSuccess String Int
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -57,59 +69,83 @@ update msg model =
         | messages = ("Received success: "++(toString db)) :: model.messages
         , db = Just db
       } ! []
-    OpenStore osname ->
-      let
-        m_t = case model.db of
-          Nothing -> Nothing
-          Just db -> Just (IndexedDB.transaction osname IndexedDB.ReadOnly db)
-        m_os = case m_t of
-          Nothing -> Nothing
-          Just t -> Just (IndexedDB.transactionObjectStore osname t)
-      in
-        { model
-          | messages = ("Opened store "++osname++": "++(toString m_os)) :: model.messages
-        } ! []
+    UpdateDataEntryField str ->
+      { model
+        | data_entry_field = str
+      } ! []
+    Add str ->
+      case model.db of
+        Just db ->
+          { model
+            | messages = ("Adding item: "++str) :: model.messages
+          } ! [ (addItem str db) ]
+        Nothing ->
+          { model
+            | messages = ("Cannot add item "++str++" as store is not open") :: model.messages
+          } ! []
+    AddOnError ev ->
+      { model
+        | messages = ("Received error: "++(toString ev)) :: model.messages
+      } ! []
+    AddOnSuccess value id ->
+      { model
+        | data = List.append model.data [ DataEntry id value ]
+      } ! []
 
 -- VIEW
 
 view : Model -> Html Msg
 view model =
   div []
-    [ (
-        case model.db of
-          Nothing ->
-            div []
-              [ input
-                [ id "opendb"
-                , name "opendb"
-                , type' "submit"
-                , value "Open DB"
-                , onClick (OpenDb "testdb" 1)
-                ]
-                []
-              ]
-          Just jdb ->
-            div []
-              [ input
-                [ id "opendb"
-                , name "opendb"
-                , type' "submit"
-                , value "Open DB (done)"
-                , disabled True
-                ]
-                []
-              , input
-                [ id "openstore"
-                , name "openstore"
-                , type' "submit"
-                , value "Open Store"
-                , onClick (OpenStore "data")
-                ]
-                []
-              ]
-      )
+    [ input
+      [ id "opendb"
+      , name "opendb"
+      , type' "submit"
+      , value "Open DB"
+      , disabled (if model.db == Nothing then False else True)
+      , onClick (OpenDb "testdb" 1)
+      ]
+      []
+    , h2 [] [ text "Objects" ]
+    , div []
+      [ input
+        [ id "data-entry"
+        , name "data-entry"
+        , type' "text"
+        , value model.data_entry_field
+        , disabled (if model.db == Nothing then True else False)
+        , onInput UpdateDataEntryField
+        ]
+        []
+      , input
+        [ id "data-add"
+        , name "data-add"
+        , type' "submit"
+        , value "Add"
+        , disabled (if model.db == Nothing then True else False)
+        , onClick (Add model.data_entry_field)
+        ]
+        []
+      ]
+    , table []
+      (viewObjectHeader :: (List.map viewObjectLine model.data))
+    , h2 [] [ text "Messages" ]
     , ol []
       (List.map (\m -> li [] [ text m ]) model.messages)
+    ]
+
+viewObjectHeader : Html Msg
+viewObjectHeader =
+  tr []
+    [ td [] [ text "id" ]
+    , td [] [ text "value" ]
+    ]
+
+viewObjectLine : DataEntry -> Html Msg
+viewObjectLine entry =
+  tr []
+    [ td [] [ text (toString entry.id) ]
+    , td [] [ text entry.value ]
     ]
 
 -- SUBSCRIPTIONS
@@ -130,3 +166,13 @@ onVersionChange evt =
     os = IndexedDB.createObjectStore "data" {key_path = Nothing, auto_increment = True} evt.db
   in
     True
+
+addItem : String -> IndexedDB.Database -> Cmd Msg
+addItem value db =
+  let
+    os =
+      db
+      |> IndexedDB.transaction ["data"] IndexedDB.ReadWrite
+      |> IndexedDB.transactionObjectStore "data"
+  in
+    Task.perform AddOnError (AddOnSuccess value) (IndexedDB.objectStoreAdd value Nothing os)
