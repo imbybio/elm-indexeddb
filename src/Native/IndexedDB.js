@@ -59,6 +59,11 @@ function cmp(k1, k2)
     return { ctor: _elm_lang$core$Native_Basics.ord[indexedDB.cmp(k1, k2) + 1] };
 }
 
+function databaseClose(db)
+{
+    db.close();
+}
+
 function databaseCreateObjectStore(db, osname, osopts)
 {
     var josopts = {
@@ -71,7 +76,22 @@ function databaseCreateObjectStore(db, osname, osopts)
     if (keyPath != null) {
         josopts.keyPath = keyPath;
     }
-    return toObjectStore(db.createObjectStore(osname, josopts));
+    try {
+        return toOkResult(toObjectStore(db.createObjectStore(osname, josopts)));
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
+}
+
+function databaseDeleteObjectStore(db, osname)
+{
+    try {
+        return toOkResult(db.deleteObjectStore(osname));
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
 }
 
 function databaseTransaction(db, snames, mode)
@@ -260,7 +280,9 @@ return {
     open: F3(open),
     deleteDatabase: deleteDatabase,
     cmp: F2(cmp),
+    databaseClose: databaseClose,
     databaseCreateObjectStore: F3(databaseCreateObjectStore),
+    databaseDeleteObjectStore: F2(databaseDeleteObjectStore),
     databaseTransaction: F3(databaseTransaction),
     transactionObjectStore: F2(transactionObjectStore),
     objectStoreAdd: F3(objectStoreAdd),

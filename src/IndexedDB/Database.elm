@@ -17,11 +17,27 @@ type alias Database =
   , handle: Json.Value
   }
 
-{-| Create an object store given a database
+{-| Close an open database
+-}
+close : Database -> ()
+close db =
+  Native.IndexedDB.databaseClose db.handle
+
+{-| Create an object store in a database
 -}
 createObjectStore : String -> ObjectStoreOptions -> Database -> ObjectStore
 createObjectStore osname osopts db =
   Native.IndexedDB.databaseCreateObjectStore db.handle osname osopts
+
+{-| Delete an object store from a database
+-}
+deleteObjectStore : String -> Database -> Result Error ()
+deleteObjectStore osname db =
+  Result.formatError promoteError (rawDeleteObjectStore osname db)
+
+rawDeleteObjectStore : String -> Database -> Result RawError ()
+rawDeleteObjectStore osname db =
+  Native.IndexedDB.databaseDeleteObjectStore db.handle osname
 
 {-| Create a transaction to perform operations on the database
 -}
