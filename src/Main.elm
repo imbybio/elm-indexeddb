@@ -65,6 +65,9 @@ type Msg
   | GetOnSuccess Int (Maybe String)
   | BadTransaction
   | BadObjectStore
+  | DeleteDb String
+  | DeleteDbOnError Error.Error
+  | DeleteDbOnSuccess ()
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -192,6 +195,19 @@ update msg model =
                 { model
                   | messages = ("Object store error: "++(toString err)) :: model.messages
                 } ! []
+    DeleteDb dbname ->
+      { model
+        | messages = ("Deleting DB "++dbname) :: model.messages
+      } ! [ (deleteDb dbname) ]
+    DeleteDbOnError ev ->
+      { model
+        | messages = ("Received error: "++(toString ev)) :: model.messages
+      } ! []
+    DeleteDbOnSuccess _ ->
+      { model
+        | messages = ("Received success") :: model.messages
+        , db = Nothing
+      } ! []
 
 -- VIEW
 
@@ -223,6 +239,15 @@ view model =
       , value "Bad Object Store"
       , disabled (if model.db == Nothing then True else False)
       , onClick BadObjectStore
+      ]
+      []
+    , input
+      [ id "deletedb"
+      , name "deletedb"
+      , type' "submit"
+      , value "Delete DB"
+      , disabled False
+      , onClick (DeleteDb "testdb")
       ]
       []
     , h2 [] [ text "Objects" ]
@@ -309,6 +334,10 @@ subscriptions model =
 openDb : String -> Int -> Cmd Msg
 openDb dbname dbvsn =
   Task.perform OpenDbOnError OpenDbOnSuccess (IndexedDB.open dbname dbvsn onVersionChange)
+
+deleteDb : String -> Cmd Msg
+deleteDb dbname =
+  Task.perform DeleteDbOnError DeleteDbOnSuccess (IndexedDB.deleteDatabase dbname)
 
 onVersionChange : IndexedDB.VersionChangeEvent -> Bool
 onVersionChange evt =

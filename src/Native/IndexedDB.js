@@ -2,10 +2,14 @@
 
 var _imbybio$elm_indexeddb$Native_IndexedDB = function() {
 
+function getIndexedDB() {
+    return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+}
+
 function open(dbname, dbvsn, upgradeneededcallback)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+        var indexedDB = getIndexedDB();
 
         var req = indexedDB.open(dbname, dbvsn);
         req.addEventListener('error', function(evt) {
@@ -26,6 +30,33 @@ function open(dbname, dbvsn, upgradeneededcallback)
         return function() {
         };
     });
+}
+
+function deleteDatabase(dbname)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var indexedDB = getIndexedDB();
+
+        var req = indexedDB.deleteDatabase(dbname);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('blocked', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toBlockedEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed());
+        });
+
+        return function() {
+        };
+    });
+}
+
+function cmp(k1, k2)
+{
+    var indexedDB = getIndexedDB();
+    return { ctor: _elm_lang$core$Native_Basics.ord[indexedDB.cmp(k1, k2) + 1] };
 }
 
 function databaseCreateObjectStore(db, osname, osopts)
@@ -227,6 +258,8 @@ function toErrResult(err) {
 
 return {
     open: F3(open),
+    deleteDatabase: deleteDatabase,
+    cmp: F2(cmp),
     databaseCreateObjectStore: F3(databaseCreateObjectStore),
     databaseTransaction: F3(databaseTransaction),
     transactionObjectStore: F2(transactionObjectStore),
