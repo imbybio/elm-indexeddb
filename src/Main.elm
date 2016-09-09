@@ -350,7 +350,7 @@ getItem key db =
       (Transaction.objectStore "data")
   in
     Task.perform GetOnError (GetOnSuccess key) (
-      Task.fromResult r_os `Task.andThen` (ObjectStore.get key)
+      Task.fromResult r_os `Task.andThen` (ObjectStore.getString key)
       )
 
 decodeKey : String -> Result String Int

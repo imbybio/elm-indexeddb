@@ -8,7 +8,7 @@ module IndexedDB.Database exposing
 import Json.Decode as Json
 import IndexedDB.ObjectStore exposing(ObjectStore, ObjectStoreOptions)
 import IndexedDB.Transaction exposing(Transaction, TransactionMode)
-import IndexedDB.Error exposing(Error)
+import IndexedDB.Error exposing(Error, RawError, promoteError)
 import Native.IndexedDB
 
 type alias Database =
@@ -27,4 +27,8 @@ createObjectStore osname osopts db =
 -}
 transaction : List String -> TransactionMode -> Database -> Result Error Transaction
 transaction snames mode db =
+  Result.formatError promoteError (rawTransaction snames mode db)
+
+rawTransaction : List String -> TransactionMode -> Database -> Result RawError Transaction
+rawTransaction snames mode db =
   Native.IndexedDB.databaseTransaction db.handle snames mode

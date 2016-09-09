@@ -10,12 +10,12 @@ function open(dbname, dbvsn, upgradeneededcallback)
         var req = indexedDB.open(dbname, dbvsn);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(
-                { ctor: 'Error', _0: evt }
+                { ctor: 'RawErrorEvent', _0: evt.type }
                 ));
         });
         req.addEventListener('blocked', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(
-                { ctor: 'Blocked', _0: evt }
+                { ctor: 'RawBlockedEvent', _0: evt }
                 ));
         });
         req.addEventListener('upgradeneeded', function(evt) {
@@ -60,8 +60,9 @@ function databaseTransaction(db, snames, mode)
         return {
             ctor: 'Err',
             _0: {
-                ctor: 'Error',
-                _0: err
+                ctor: 'RawDomException',
+                _0: err.code,
+                _1: err.name
             }
         };
     }
@@ -79,8 +80,9 @@ function transactionObjectStore(t, osname)
         return {
             ctor: 'Err',
             _0: {
-                ctor: 'Error',
-                _0: err
+                ctor: 'RawDomException',
+                _0: err.code,
+                _1: err.name
             }
         };
     }
@@ -96,7 +98,7 @@ function objectStoreAdd(os, item, key)
         var req = os.add(item, jkey)
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(
-                { ctor: 'Error', _0: evt }
+                { ctor: 'RawErrorEvent', _0: evt.type }
                 ));
         });
         req.addEventListener('success', function() {
@@ -118,7 +120,7 @@ function objectStorePut(os, item, key)
         var req = os.put(item, jkey)
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(
-                { ctor: 'Error', _0: evt }
+                { ctor: 'RawErrorEvent', _0: evt.type }
                 ));
         });
         req.addEventListener('success', function() {
@@ -136,7 +138,7 @@ function objectStoreDelete(os, key)
         var req = os.delete(key)
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(
-                { ctor: 'Error', _0: evt }
+                { ctor: 'RawErrorEvent', _0: evt.type }
                 ));
         });
         req.addEventListener('success', function() {
@@ -154,7 +156,7 @@ function objectStoreGet(os, key)
         var req = os.get(key)
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(
-                { ctor: 'Error', _0: evt }
+                { ctor: 'RawErrorEvent', _0: evt.type }
                 ));
         });
         req.addEventListener('success', function() {
