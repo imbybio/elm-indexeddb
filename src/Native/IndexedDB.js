@@ -130,7 +130,7 @@ function objectStoreAdd(os, item, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
         var jkey = fromMaybe(key);
-        var req = os.add(item, jkey)
+        var req = os.add(item, jkey);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -147,7 +147,7 @@ function objectStorePut(os, item, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
         var jkey = fromMaybe(key);
-        var req = os.put(item, jkey)
+        var req = os.put(item, jkey);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -163,7 +163,7 @@ function objectStorePut(os, item, key)
 function objectStoreDelete(os, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = os.delete(key)
+        var req = os.delete(key);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -179,12 +179,28 @@ function objectStoreDelete(os, key)
 function objectStoreGet(os, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = os.get(key)
+        var req = os.get(key);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
         req.addEventListener('success', function() {
             return callback(_elm_lang$core$Native_Scheduler.succeed(toMaybe(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function objectStoreClear(os)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = os.clear();
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed());
         });
 
         return function() {
@@ -299,7 +315,8 @@ return {
     objectStoreAdd: F3(objectStoreAdd),
     objectStorePut: F3(objectStorePut),
     objectStoreDelete: F2(objectStoreDelete),
-    objectStoreGet: F2(objectStoreGet)
+    objectStoreGet: F2(objectStoreGet),
+    objectStoreClear: objectStoreClear
 };
 
 }();

@@ -66,6 +66,16 @@ rawGet : key -> ObjectStore -> Task RawError (Maybe Json.Value)
 rawGet key os =
   Native.IndexedDB.objectStoreGet os.handle key
 
+{-| Clear an object store
+-}
+clear : ObjectStore -> Task Error ()
+clear os =
+  mapError promoteError (rawClear os)
+
+rawClear : ObjectStore -> Task RawError ()
+rawClear os =
+  Native.IndexedDB.objectStoreClear os.handle
+
 -- Result handling
 
 fromJson : Json.Decoder a -> Task RawError (Maybe Json.Value) -> Task Error (Maybe a)
