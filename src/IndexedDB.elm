@@ -1,4 +1,6 @@
-module IndexedDB exposing (..)
+module IndexedDB exposing
+  ( open, VersionChangeEvent
+  )
 
 {-| This library provides access to the IndexedDB API.
 
@@ -8,10 +10,10 @@ module IndexedDB exposing (..)
 -}
 
 import Json.Decode as Json
-import Task exposing (Task)
+import Task exposing (Task, mapError)
 import Time exposing (Time)
 import IndexedDB.Database exposing(Database)
-import IndexedDB.Error exposing(Error)
+import IndexedDB.Error exposing(Error, RawError, promoteError)
 import Native.IndexedDB
 
 type alias VersionChangeEvent =
@@ -26,4 +28,10 @@ type alias VersionChangeEvent =
 -}
 open : String -> Int -> (VersionChangeEvent -> Bool) -> Task Error Database
 open dbname dbvsn onvsnchange =
+  mapError promoteError (Native.IndexedDB.open dbname dbvsn onvsnchange)
+
+rawOpen : String -> Int -> (VersionChangeEvent -> Bool) -> Task RawError Database
+rawOpen dbname dbvsn onvsnchange =
   Native.IndexedDB.open dbname dbvsn onvsnchange
+
+--deleteDatabase : String -> Task Error Database
