@@ -106,6 +106,16 @@ function databaseTransaction(db, snames, mode)
     }
 }
 
+function transactionAbort(t)
+{
+    try {
+        return toOkResult(t.abort());
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
+}
+
 function transactionObjectStore(t, osname)
 {
     try {
@@ -284,6 +294,7 @@ return {
     databaseCreateObjectStore: F3(databaseCreateObjectStore),
     databaseDeleteObjectStore: F2(databaseDeleteObjectStore),
     databaseTransaction: F3(databaseTransaction),
+    transactionAbort: transactionAbort,
     transactionObjectStore: F2(transactionObjectStore),
     objectStoreAdd: F3(objectStoreAdd),
     objectStorePut: F3(objectStorePut),

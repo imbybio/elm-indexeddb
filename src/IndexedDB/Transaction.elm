@@ -20,6 +20,16 @@ type TransactionMode
   = ReadOnly
   | ReadWrite
 
+{-| Abort a transaction
+-}
+abort : Transaction -> Result Error ()
+abort transaction =
+  Result.formatError promoteError (rawAbort transaction)
+
+rawAbort : Transaction -> Result RawError ()
+rawAbort transaction =
+  Native.IndexedDB.transactionAbort transaction.handle
+
 {-| Get an object store from a transaction
 -}
 objectStore : String -> Transaction -> Result Error ObjectStore
