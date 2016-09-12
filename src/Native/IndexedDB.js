@@ -208,6 +208,32 @@ function objectStoreClear(os)
     });
 }
 
+function keyRangeUpperBound(upper, upper_open)
+{
+    // How do we ensure the IDBKeyRange interface is the correct one?
+    return toKeyRange(IDBKeyRange.upperBound(upper, upper_open));
+}
+
+function keyRangeLowerBound(lower, lower_open)
+{
+    return toKeyRange(IDBKeyRange.lowerBound(lower, lower_open));
+}
+
+function keyRangeBound(lower, upper, lower_open, upper_open)
+{
+    return toKeyRange(IDBKeyRange.bound(lower, upper, lower_open, upper_open));
+}
+
+function keyRangeOnly(value)
+{
+    return toKeyRange(IDBKeyRange.only(value));
+}
+
+function keyRangeIncludes(kr, value)
+{
+    return kr.includes(value);
+}
+
 // Structure returned values into Elm friendly objects
 
 function toVersionchangeEvent(evt) {
@@ -217,7 +243,7 @@ function toVersionchangeEvent(evt) {
         timestamp: evt.timestamp,
         db: toDatabase(evt.target.result),
         handle: evt
-    }
+    };
 }
 
 function toDatabase(db) {
@@ -225,14 +251,14 @@ function toDatabase(db) {
         name: db.name,
         version: db.version,
         handle: db
-    }
+    };
 }
 
 function toObjectStore(os) {
     return {
         name: os.name,
         handle: os
-    }
+    };
 }
 
 function toTransaction(t) {
@@ -240,7 +266,17 @@ function toTransaction(t) {
         mode: toTransactionMode(t.mode),
         object_store_names: _elm_lang$core$Native_List.fromArray(t.objectStoreNames),
         handle: t
-    }
+    };
+}
+
+function toKeyRange(kr) {
+    return {
+        lower: toMaybe(kr.lower),
+        upper: toMaybe(kr.upper),
+        lower_open: kr.lowerOpen,
+        upper_open: kr.upperOpen,
+        handle: kr
+    };
 }
 
 // Transform simple structure to and from Elm
@@ -316,7 +352,12 @@ return {
     objectStorePut: F3(objectStorePut),
     objectStoreDelete: F2(objectStoreDelete),
     objectStoreGet: F2(objectStoreGet),
-    objectStoreClear: objectStoreClear
+    objectStoreClear: objectStoreClear,
+    keyRangeUpperBound: F2(keyRangeUpperBound),
+    keyRangeLowerBound: F2(keyRangeLowerBound),
+    keyRangeBound: F4(keyRangeBound),
+    keyRangeOnly: keyRangeOnly,
+    keyRangeIncludes: F2(keyRangeIncludes)
 };
 
 }();
