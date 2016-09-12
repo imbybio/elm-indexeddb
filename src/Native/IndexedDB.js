@@ -3,7 +3,7 @@
 var _imbybio$elm_indexeddb$Native_IndexedDB = function() {
 
 function getIndexedDB() {
-    return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 }
 
 function open(dbname, dbvsn, upgradeneededcallback)
@@ -274,7 +274,7 @@ function objectStoreOpenCursor(os, key_range, direction)
         if (jdir != null) {
             jdir = fromCursorDirection(jdir);
         }
-        var req = os.openCursor(os, jkr, jdir);
+        var req = os.openCursor(jkr, jdir);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -295,7 +295,7 @@ function objectStoreOpenKeyCursor(os, key_range, direction)
         if (jdir != null) {
             jdir = fromCursorDirection(jdir);
         }
-        var req = os.openKeyCursor(os, jkr, jdir);
+        var req = os.openKeyCursor(jkr, jdir);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -411,6 +411,138 @@ function cursorUpdate(cursor, value)
     });
 }
 
+function indexCount(idx, key_range)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        // TODO: check that this works even if jkr is null
+        var req = idx.count(jkr);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function indexGet(idx, key)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = idx.get(key);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(toMaybe(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function indexGetAll(idx, key_range, count)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jcount = fromMaybe(count);
+        // TODO: check that this works even if jkr and/or jcount are null
+        var req = idx.getAll(jkr, jcount);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(
+                _elm_lang$core$Native_List.fromArray(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function indexGetKey(idx, key)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = idx.getKey(key);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function indexGetAllKeys(idx, key_range, count)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jcount = fromMaybe(count);
+        // TODO: check that this works even if jkr and/or jcount are null
+        var req = idx.getAllKeys(jkr, jcount);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(
+                _elm_lang$core$Native_List.fromArray(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function indexOpenCursor(idx, key_range, direction)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jdir = fromMaybe(direction);
+        if (jdir != null) {
+            jdir = fromCursorDirection(jdir);
+        }
+        var req = idx.openCursor(jkr, jdir);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function indexOpenKeyCursor(idx, key_range, direction)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jdir = fromMaybe(direction);
+        if (jdir != null) {
+            jdir = fromCursorDirection(jdir);
+        }
+        var req = idx.openKeyCursor(jkr, jdir);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
 // Structure returned values into Elm friendly objects
 
 function toVersionchangeEvent(evt) {
@@ -487,6 +619,15 @@ function fromCursorDirection(d) {
     }
 }
 
+function toIndex(idx) {
+    return {
+        name : idx.name,
+        multi_entry : idx.multiEntry,
+        unique : idx.unique,
+        handle: idx
+    };
+}
+
 // Transform simple structure to and from Elm
 
 function fromMaybe(m) {
@@ -560,24 +701,31 @@ return {
     objectStorePut: F3(objectStorePut),
     objectStoreDelete: F2(objectStoreDelete),
     objectStoreGet: F2(objectStoreGet),
-    objectStoreGetAll : F3(objectStoreGetAll),
-    objectStoreGetAllKeys : F3(objectStoreGetAllKeys),
-    objectStoreCount : F2(objectStoreCount),
+    objectStoreGetAll: F3(objectStoreGetAll),
+    objectStoreGetAllKeys: F3(objectStoreGetAllKeys),
+    objectStoreCount: F2(objectStoreCount),
     objectStoreClear: objectStoreClear,
-    objectStoreOpenCursor : F3(objectStoreOpenCursor),
-    objectStoreOpenKeyCursor : F3(objectStoreOpenKeyCursor),
+    objectStoreOpenCursor: F3(objectStoreOpenCursor),
+    objectStoreOpenKeyCursor: F3(objectStoreOpenKeyCursor),
     keyRangeUpperBound: F2(keyRangeUpperBound),
     keyRangeLowerBound: F2(keyRangeLowerBound),
     keyRangeBound: F4(keyRangeBound),
     keyRangeOnly: keyRangeOnly,
     keyRangeIncludes: F2(keyRangeIncludes),
-    cursorKey : cursorKey,
-    cursorPrimaryKey : cursorPrimaryKey,
-    cursorValue : cursorValue,
-    cursorAdvance : F2(cursorAdvance),
-    cursorContinue : F2(cursorContinue),
-    cursorDelete : cursorDelete,
-    cursorUpdate : F2(cursorUpdate)
+    cursorKey: cursorKey,
+    cursorPrimaryKey: cursorPrimaryKey,
+    cursorValue: cursorValue,
+    cursorAdvance: F2(cursorAdvance),
+    cursorContinue: F2(cursorContinue),
+    cursorDelete: cursorDelete,
+    cursorUpdate: F2(cursorUpdate),
+    indexCount: indexCount,
+    indexGet: F2(indexGet),
+    indexGetAll: F3(indexGetAll),
+    indexGetKey: F2(indexGetKey),
+    indexGetAllKeys: F3(indexGetAllKeys),
+    indexOpenCursor: F3(indexOpenCursor),
+    indexOpenKeyCursor: F3(indexOpenKeyCursor)
 };
 
 }();
