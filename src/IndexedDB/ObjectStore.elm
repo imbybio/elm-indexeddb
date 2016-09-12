@@ -8,6 +8,7 @@ module IndexedDB.ObjectStore exposing
 import Json.Decode as Json
 import Task exposing (Task, andThen, mapError, succeed, fail, fromResult)
 import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
+import IndexedDB.KeyRange exposing(KeyRange)
 import Native.IndexedDB
 
 type alias ObjectStore =
@@ -66,17 +67,45 @@ rawGet : key -> ObjectStore -> Task RawError (Maybe Json.Value)
 rawGet key os =
   Native.IndexedDB.objectStoreGet os.handle key
 
+{-| Get all values matching the given key range; will default to all values
+if no key range is specified.
+-}
+getAll : Json.Decoder value -> Maybe (KeyRange key) -> Maybe Int -> ObjectStore -> Task Error (List value)
+getAll decoder key_range count os =
+  fromJsonList decoder (rawGetAll key_range count os)
+
+rawGetAll : Maybe (KeyRange key) -> Maybe Int -> ObjectStore -> Task RawError (List Json.Value)
+rawGetAll key_range count os =
+  Native.IndexedDB.objectStoreGetAll os.handle (Maybe.map .handle key_range) count
+
+{-| Get all keys for items in the store matching the given key range; defaults
+to all keys if no key range is specified.
+-}
+getAllKeys : Maybe (KeyRange key) -> Maybe Int -> ObjectStore -> Task Error (List key)
+getAllKeys key_range count os =
+  mapError promoteError (
+    Native.IndexedDB.objectStoreGetAllKeys os.handle (Maybe.map .handle key_range) count
+    )
+
+{-| Count the number of items in the store matching the given key range;
+defaults to full store count if no key range is specified
+-}
+count : Maybe (KeyRange key) -> ObjectStore -> Task Error Int
+count key_range os =
+  mapError promoteError (
+    Native.IndexedDB.objectStoreCount os.handle (Maybe.map .handle key_range)
+    )
+
 {-| Clear an object store
 -}
 clear : ObjectStore -> Task Error ()
 clear os =
-  mapError promoteError (rawClear os)
-
-rawClear : ObjectStore -> Task RawError ()
-rawClear os =
-  Native.IndexedDB.objectStoreClear os.handle
+  mapError promoteError (Native.IndexedDB.objectStoreClear os.handle)
+  
 
 -- Result handling
+
+-- Maybe result
 
 fromJson : Json.Decoder a -> Task RawError (Maybe Json.Value) -> Task Error (Maybe a)
 fromJson decoder result =
@@ -95,3 +124,25 @@ decodeJson decoder m_value =
     Nothing -> Result.Ok Nothing
     Just value ->
       Json.decodeValue decoder value |> Result.map (\v -> Just v)
+
+-- List result
+
+fromJsonList : Json.Decoder a -> Task RawError (List Json.Value) -> Task Error (List a)
+fromJsonList decoder result =
+  mapError promoteError result
+    `andThen` (decodeJsonListToTask decoder)
+
+decodeJsonListToTask : Json.Decoder a -> List Json.Value -> Task Error (List a)
+decodeJsonListToTask decoder values =
+  case decodeJsonList decoder values of
+    Ok v -> succeed v
+    Err msg -> fail (UnexpectedPayload msg)
+
+decodeJsonList : Json.Decoder a -> List Json.Value -> Result String (List a)
+decodeJsonList decoder values =
+  List.foldl (
+    \value -> \result ->
+      Result.map2
+      (\list -> \dvalue -> List.append list [dvalue])
+      result (Json.decodeValue decoder value)
+    ) (Ok []) values

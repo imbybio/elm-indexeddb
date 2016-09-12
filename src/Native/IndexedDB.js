@@ -192,6 +192,64 @@ function objectStoreGet(os, key)
     });
 }
 
+function objectStoreGetAll(os, key_range, count)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jcount = fromMaybe(count);
+        // TODO: check that this works even if jkr and/or jcount are null
+        var req = os.getAll(jkr, jcount);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(
+                _elm_lang$core$Native_List.fromArray(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function objectStoreGetAllKeys(os, key_range, count)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jcount = fromMaybe(count);
+        // TODO: check that this works even if jkr and/or jcount are null
+        var req = os.getAllKeys(jkr, jcount);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(
+                _elm_lang$core$Native_List.fromArray(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function objectStoreCount(os, key_range)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        // TODO: check that this works even if jkr is null
+        var req = os.count(jkr);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+        });
+
+        return function() {
+        };
+    });
+}
+
 function objectStoreClear(os)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
@@ -352,6 +410,9 @@ return {
     objectStorePut: F3(objectStorePut),
     objectStoreDelete: F2(objectStoreDelete),
     objectStoreGet: F2(objectStoreGet),
+    objectStoreGetAll : F3(objectStoreGetAll),
+    objectStoreGetAllKeys : F3(objectStoreGetAllKeys),
+    objectStoreCount : F2(objectStoreCount),
     objectStoreClear: objectStoreClear,
     keyRangeUpperBound: F2(keyRangeUpperBound),
     keyRangeLowerBound: F2(keyRangeLowerBound),

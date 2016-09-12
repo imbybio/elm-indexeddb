@@ -1,5 +1,5 @@
 module IndexedDB.KeyRange exposing
-  (
+  ( KeyRange, upperBound, lowerBound, bound, only, includes
   )
 
 {-| IndexedDB KeyRange objects and operations
