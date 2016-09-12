@@ -292,6 +292,83 @@ function keyRangeIncludes(kr, value)
     return kr.includes(value);
 }
 
+function cursorKey(cursor)
+{
+    return cursor.key;
+}
+
+function cursorPrimaryKey(cursor)
+{
+    return cursor.primaryKey;
+}
+
+function cursorValue(cursor)
+{
+    return cursor.value;
+}
+
+function cursorAdvance(cursor, count)
+{
+    var jcount = fromMaybe(count);
+    try {
+        if (jcount == null) {
+            return toOkResult(cursor.advance());
+        } else {
+            return toOkResult(cursor.advance(jcount));
+        }
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
+}
+
+function cursorContinue(cursor, key)
+{
+    var jkey = fromMaybe(key);
+    try {
+        if (jkey == null) {
+            return toOkResult(cursor.continue());
+        } else {
+            return toOkResult(cursor.continue(jkey));
+        }
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
+}
+
+function cursorDelete(cursor)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = cursor.delete();
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed());
+        });
+
+        return function() {
+        };
+    });
+}
+
+function cursorUpdate(cursor, value)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var req = cursor.update(value);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed());
+        });
+
+        return function() {
+        };
+    });
+}
+
 // Structure returned values into Elm friendly objects
 
 function toVersionchangeEvent(evt) {
@@ -335,6 +412,25 @@ function toKeyRange(kr) {
         upper_open: kr.upperOpen,
         handle: kr
     };
+}
+
+function toCursor(c) {
+    return {
+        direction : toCursorDirecton(c.direction),
+        handle: c
+    };
+}
+
+function toCursorDirection(d) {
+    if (d == "next") {
+        return { ctor: 'Next' };
+    } else if (d == "nextunique") {
+        return { ctor: 'NextUnique' };
+    } else if (d == "prev") {
+        return { ctor: 'Prev' };
+    } else {
+        return { ctor: 'PrevUnique' };
+    }
 }
 
 // Transform simple structure to and from Elm
@@ -418,7 +514,14 @@ return {
     keyRangeLowerBound: F2(keyRangeLowerBound),
     keyRangeBound: F4(keyRangeBound),
     keyRangeOnly: keyRangeOnly,
-    keyRangeIncludes: F2(keyRangeIncludes)
+    keyRangeIncludes: F2(keyRangeIncludes),
+    cursorKey : cursorKey,
+    cursorPrimaryKey : cursorPrimaryKey,
+    cursorValue : cursorValue,
+    cursorAdvance : F2(cursorAdvance),
+    cursorContinue : F2(cursorContinue),
+    cursorDelete : cursorDelete,
+    cursorUpdate : F2(cursorUpdate)
 };
 
 }();
