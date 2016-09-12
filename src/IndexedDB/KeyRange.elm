@@ -2,13 +2,24 @@ module IndexedDB.KeyRange exposing
   ( KeyRange, upperBound, lowerBound, bound, only, includes
   )
 
-{-| IndexedDB KeyRange objects and operations
+{-| Interface to an IndexedDB KeyRange.
+
+# Create key ranges
+@docs upperBound, lowerBound, bound, only
+
+# Verify that a value is in a range
+@docs includes
+
+# Data structure
+@docs KeyRange
 -}
 
 import Json.Decode as Json
 import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
 import Native.IndexedDB
 
+{-| KeyRange data structure
+-}
 type alias KeyRange k =
   { lower : Maybe k
   , upper : Maybe k

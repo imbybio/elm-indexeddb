@@ -3,7 +3,16 @@ module IndexedDB.Index exposing
   , openCursor, openKeyCursor
   )
 
-{-| IndexedDB Index object and operations
+{-| Module that provides and interface to an IndexedDB Index.
+
+# Direct data access and update via secondary key
+@docs count, get, getAll, getKey, getAllKeys
+
+# Sequential data access
+@docs openCursor, openKeyCursor
+
+# Data structure
+@docs Index, IndexOptions
 -}
 
 import Json.Decode as Json
@@ -14,6 +23,8 @@ import IndexedDB.Cursor exposing(Cursor, Direction)
 import IndexedDB.Json exposing(fromJson, fromJsonList)
 import Native.IndexedDB
 
+{-| Index data structure.
+-}
 type alias Index =
   { name : String
   , multi_entry : Bool
@@ -21,6 +32,8 @@ type alias Index =
   , handle : Json.Value
   }
 
+{-| Index options data structure, used when creating the index.
+-}
 type alias IndexOptions =
   { multi_entry : Bool
   , unique : Bool

@@ -1,12 +1,18 @@
-//import Dict, List, Maybe, Native.Scheduler //
+//import List, Maybe, Native.Scheduler //
+
+// Native interface between Elm and the IndexedDB JavaScript API.
+// Implementation follows the Mozilla documentation:
+// https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
 
 var _imbybio$elm_indexeddb$Native_IndexedDB = function() {
 
-// Main entry point to get hold of the IndexedDB top level interface
+// Main entry point to get hold of the IndexedDB top level IDBFactory interface
 // Designed to work with https://github.com/axemclion/IndexedDBShim if present
 function getIndexedDB() {
     return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 }
+
+// IDBFactory functions
 
 function open(dbname, dbvsn, upgradeneededcallback)
 {
@@ -61,6 +67,8 @@ function cmp(k1, k2)
     return { ctor: _elm_lang$core$Native_Basics.ord[indexedDB.cmp(k1, k2) + 1] };
 }
 
+// IDBDatabase functions
+
 function databaseClose(db)
 {
     db.close();
@@ -112,6 +120,8 @@ function databaseTransaction(db, snames, mode)
     }
 }
 
+// IDBTransaction functions
+
 function transactionAbort(t)
 {
     try {
@@ -131,6 +141,8 @@ function transactionObjectStore(t, osname)
         return toErrResult(toDomException(err));
     }
 }
+
+// IDBObjectStore functions
 
 function objectStoreAdd(os, item, key)
 {
@@ -348,6 +360,8 @@ function objectStoreIndex(os, idxname)
     }
 }
 
+// IDBKeyRange functions
+
 function keyRangeUpperBound(upper, upper_open)
 {
     // How do we ensure the IDBKeyRange interface is the correct one?
@@ -373,6 +387,8 @@ function keyRangeIncludes(kr, value)
 {
     return kr.includes(value);
 }
+
+// IDBCursor functions
 
 function cursorKey(cursor)
 {
@@ -450,6 +466,8 @@ function cursorUpdate(cursor, value)
         };
     });
 }
+
+// IDBIndex functions
 
 function indexCount(idx, key_range)
 {
@@ -583,7 +601,8 @@ function indexOpenKeyCursor(idx, key_range, direction)
     });
 }
 
-// Structure returned values into Elm friendly objects
+// Utility functions to transform IndexedDB objects to and from Elm friendly
+// data structures
 
 function toVersionchangeEvent(evt) {
     return {
@@ -606,6 +625,7 @@ function toDatabase(db) {
 function toObjectStore(os) {
     return {
         name: os.name,
+        auto_increment: os.autoIncrement,
         handle: os
     };
 }
@@ -668,7 +688,24 @@ function toIndex(idx) {
     };
 }
 
-// Transform simple structure to and from Elm
+function fromTransactionMode(m) {
+    if (m.ctor == 'ReadWrite') {
+        return 'readwrite';
+    } else {
+        return 'readonly';
+    }
+}
+
+function toTransactionMode(v) {
+    // readwriteflush is Firefox specific, mapping to ReadWrite
+    if (v == 'readwrite' || v == 'readwriteflush') {
+        return { ctor: 'ReadWrite' };
+    } else {
+        return { ctor: 'ReadOnly' };
+    }
+}
+
+// Utility functions to transform simple objects to and from Elm
 
 function fromMaybe(m) {
     if (m.ctor == 'Just') {
@@ -686,22 +723,8 @@ function toMaybe(v) {
     }
 }
 
-function fromTransactionMode(m) {
-    if (m.ctor == 'ReadWrite') {
-        return 'readwrite';
-    } else {
-        return 'readonly';
-    }
-}
-
-function toTransactionMode(v) {
-    // readwriteflush is Firefox specific, mapping to ReadWrite
-    if (v == 'readwrite' || v == 'readwriteflush') {
-        return { ctor: 'ReadWrite' };
-    } else {
-        return { ctor: 'ReadOnly' };
-    }
-}
+// Utility functions to wrap JavaScript errors and results into Elm
+// data structures
 
 function toDomException(err) {
     return {
@@ -726,6 +749,8 @@ function toOkResult(v) {
 function toErrResult(err) {
     return { ctor: 'Err', _0: err };
 }
+
+// Main interface to the native API
 
 return {
     open: F3(open),

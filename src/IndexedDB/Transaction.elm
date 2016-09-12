@@ -1,8 +1,17 @@
 module IndexedDB.Transaction exposing
-  ( Transaction, TransactionMode(..), objectStore
+  ( Transaction, TransactionMode(..), objectStore, abort
   )
 
-{-| IndexedDB Transaction object and operations.
+{-| Module that provides an interface to an IndexedDB Transaction.
+
+# Data structure
+@docs Transaction, TransactionMode
+
+# Object store access
+@docs objectStore
+
+# Transaction management
+@docs abort
 -}
 
 import Json.Decode as Json
@@ -10,32 +19,34 @@ import IndexedDB.ObjectStore exposing(ObjectStore)
 import IndexedDB.Error exposing(Error, RawError, promoteError)
 import Native.IndexedDB
 
+{-| Transaction data structure.
+-}
 type alias Transaction =
   { mode: TransactionMode
   , object_store_names: List String
   , handle: Json.Value
   }
 
+{-| Transaction mode.
+-}
 type TransactionMode
   = ReadOnly
   | ReadWrite
 
-{-| Abort a transaction
+{-| Abort a transaction.
 -}
 abort : Transaction -> Result Error ()
 abort transaction =
-  Result.formatError promoteError (rawAbort transaction)
+  Result.formatError promoteError (
+    Native.IndexedDB.transactionAbort transaction.handle
+    )
 
-rawAbort : Transaction -> Result RawError ()
-rawAbort transaction =
-  Native.IndexedDB.transactionAbort transaction.handle
-
-{-| Get an object store from a transaction
+{-| Get an object store from a transaction.
+The name of the object store being queries needs to point to an existing
+object store that was provided when created the transaction context.
 -}
 objectStore : String -> Transaction -> Result Error ObjectStore
 objectStore osname transaction =
-  Result.formatError promoteError (rawObjectStore osname transaction)
-
-rawObjectStore : String -> Transaction -> Result RawError ObjectStore
-rawObjectStore osname transaction =
-  Native.IndexedDB.transactionObjectStore transaction.handle osname
+  Result.formatError promoteError (
+    Native.IndexedDB.transactionObjectStore transaction.handle osname
+    )

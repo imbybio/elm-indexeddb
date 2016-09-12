@@ -1,8 +1,26 @@
 module IndexedDB.ObjectStore exposing
-  ( ObjectStore, ObjectStoreOptions, add, put, delete, get, getString
+  ( ObjectStore, ObjectStoreOptions, add, put, delete, get, getString, getAll
+  , getAllKeys, count, clear
+  , openCursor, openKeyCursor
+  , index, createIndex, deleteIndex
   )
 
-{-| IndexedDB ObjectStore object and operations.
+{-| Module that provides and interface to an IndexedDB ObjectStore.
+
+# Direct data access and update by primary key
+@docs add, put, delete, get, getString, getAll, getAllKeys, count, clear
+
+# Sequential data access
+@docs openCursor, openKeyCursor
+
+# Data access via secondary index
+@docs index
+
+# Scheme updates
+@docs createIndex, deleteIndex
+
+# Data structure
+@docs ObjectStore, ObjectStoreOptions
 -}
 
 import Json.Decode as Json
@@ -14,17 +32,23 @@ import IndexedDB.Index exposing(Index, IndexOptions)
 import IndexedDB.Json exposing(fromJson, fromJsonList)
 import Native.IndexedDB
 
+{-| Object store data structure
+-}
 type alias ObjectStore =
   { name: String
+  , auto_increment: Bool
   , handle: Json.Value
   }
 
+{-| Object store options passed to the `objectStore` call within a transaction
+context.
+-}
 type alias ObjectStoreOptions =
   { key_path: Maybe String
   , auto_increment: Bool
   }
 
-{-| Add an item to an object store, will fail if the key already exists
+{-| Add an item to an object store, will fail if the key already exists.
 -}
 add : v -> Maybe k -> ObjectStore -> Task Error k
 add value m_key os =
@@ -32,7 +56,7 @@ add value m_key os =
     Native.IndexedDB.objectStoreAdd os.handle value m_key
     )
 
-{-| Put an item into an object store, in effect doing a add or update
+{-| Put an item into an object store, in effect doing a add or update.
 -}
 put : v -> Maybe k -> ObjectStore -> Task Error k
 put value m_key os =
@@ -40,7 +64,7 @@ put value m_key os =
     Native.IndexedDB.objectStorePut os.handle value m_key
     )
 
-{-| Delete an item from an object store
+{-| Delete an item from an object store.
 -}
 delete : k -> ObjectStore -> Task Error k
 delete key os =
@@ -48,13 +72,13 @@ delete key os =
     Native.IndexedDB.objectStoreDelete os.handle key
     )
 
-{-| Get a string from an object store
+{-| Get a string from an object store.
 -}
 getString : k -> ObjectStore -> Task Error (Maybe String)
 getString key os =
   get Json.string key os
 
-{-| Get a value from an object store and decode it
+{-| Get a value from an object store and decode it.
 -}
 get : Json.Decoder v -> k -> ObjectStore -> Task Error (Maybe v)
 get decoder key os =

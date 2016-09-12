@@ -4,6 +4,8 @@ module IndexedDB.Json exposing
 
 {-| Utility functions to manipulate JSON values received by various API
 functions.
+
+@docs fromJson, fromJsonList
 -}
 
 import Json.Decode as Json
@@ -12,6 +14,9 @@ import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
 
 -- Single result
 
+{-| Decode an optional JSON return value when the operation that returned that
+value succeeded.
+-}
 fromJson : Json.Decoder v -> Task RawError (Maybe Json.Value) -> Task Error (Maybe v)
 fromJson decoder result =
   mapError promoteError result
@@ -32,6 +37,9 @@ decodeJson decoder m_value =
 
 -- List of results
 
+{-| Decode a list of JSON return values when the operation that returned that
+list succeeded.
+-}
 fromJsonList : Json.Decoder v -> Task RawError (List Json.Value) -> Task Error (List v)
 fromJsonList decoder result =
   mapError promoteError result
