@@ -1,5 +1,6 @@
 module IndexedDB.Cursor exposing
-  (
+  ( Cursor, Direction, key, primaryKey, value, advance, continue, delete
+  , update
   )
 
 {-| IndexedDB Cursor object and operations
@@ -30,7 +31,7 @@ primaryKey cursor =
   Native.IndexedDB.cursorPrimaryKey cursor.handle
 
 value : Json.Decoder v -> Cursor -> Result String v
-value cursor =
+value decoder cursor =
   Json.decodeValue decoder (Native.IndexedDB.cursorValue cursor.handle)
 
 advance : Int -> Cursor -> Result Error ()

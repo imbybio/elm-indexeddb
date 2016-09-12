@@ -9,6 +9,7 @@ import Json.Decode as Json
 import Task exposing (Task, andThen, mapError, succeed, fail, fromResult)
 import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
 import IndexedDB.KeyRange exposing(KeyRange)
+import IndexedDB.Cursor exposing(Cursor, Direction)
 import Native.IndexedDB
 
 type alias ObjectStore =
@@ -95,6 +96,22 @@ count key_range os =
 clear : ObjectStore -> Task Error ()
 clear os =
   mapError promoteError (Native.IndexedDB.objectStoreClear os.handle)
+
+{-| Open a cursor on that object store
+-}
+openCursor : Maybe (KeyRange k) -> Maybe Direction -> ObjectStore -> Task Error Cursor
+openCursor key_range direction os =
+  mapError promoteError (
+    Native.IndexedDB.objectStoreOpenCursor os.handle (Maybe.map .handle key_range) direction
+    )
+
+{-| Open a key cursor on that object store
+-}
+openKeyCursor : Maybe (KeyRange k) -> Maybe Direction -> ObjectStore -> Task Error Cursor
+openKeyCursor key_range direction os =
+  mapError promoteError (
+    Native.IndexedDB.objectStoreOpenKeyCursor os.handle (Maybe.map .handle key_range) direction
+    )
   
 
 -- Result handling

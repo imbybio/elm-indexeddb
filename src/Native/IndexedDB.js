@@ -266,6 +266,48 @@ function objectStoreClear(os)
     });
 }
 
+function objectStoreOpenCursor(os, key_range, direction)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jdir = fromMaybe(direction);
+        if (jdir != null) {
+            jdir = fromCursorDirection(jdir);
+        }
+        var req = os.openCursor(os, jkr, jdir);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
+function objectStoreOpenKeyCursor(os, key_range, direction)
+{
+    return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+        var jkr = fromMaybe(key_range);
+        var jdir = fromMaybe(direction);
+        if (jdir != null) {
+            jdir = fromCursorDirection(jdir);
+        }
+        var req = os.openKeyCursor(os, jkr, jdir);
+        req.addEventListener('error', function(evt) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+        });
+        req.addEventListener('success', function() {
+            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+        });
+
+        return function() {
+        };
+    });
+}
+
 function keyRangeUpperBound(upper, upper_open)
 {
     // How do we ensure the IDBKeyRange interface is the correct one?
@@ -422,14 +464,26 @@ function toCursor(c) {
 }
 
 function toCursorDirection(d) {
-    if (d == "next") {
-        return { ctor: 'Next' };
-    } else if (d == "nextunique") {
+    if (d == "nextunique") {
         return { ctor: 'NextUnique' };
     } else if (d == "prev") {
         return { ctor: 'Prev' };
-    } else {
+    } else if (d == "prevunique") {
         return { ctor: 'PrevUnique' };
+    } else {
+        return { ctor: 'Next' };
+    }
+}
+
+function fromCursorDirection(d) {
+    if (d.ctor == 'NextUnique') {
+        return 'nextunique';
+    } else if (d.ctor == 'Prev') {
+        return 'prev';
+    } else if (d.ctor == 'PrevUnique') {
+        return 'prevunique';
+    } else {
+        return 'next';
     }
 }
 
@@ -510,6 +564,8 @@ return {
     objectStoreGetAllKeys : F3(objectStoreGetAllKeys),
     objectStoreCount : F2(objectStoreCount),
     objectStoreClear: objectStoreClear,
+    objectStoreOpenCursor : F3(objectStoreOpenCursor),
+    objectStoreOpenKeyCursor : F3(objectStoreOpenKeyCursor),
     keyRangeUpperBound: F2(keyRangeUpperBound),
     keyRangeLowerBound: F2(keyRangeLowerBound),
     keyRangeBound: F4(keyRangeBound),
