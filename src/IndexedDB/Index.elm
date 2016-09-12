@@ -1,5 +1,6 @@
 module IndexedDB.Index exposing
-  ( Index
+  ( Index, IndexOptions, count, get, getAll, getKey, getAllKeys
+  , openCursor, openKeyCursor
   )
 
 {-| IndexedDB Index object and operations
@@ -18,6 +19,11 @@ type alias Index =
   , multi_entry : Bool
   , unique : Bool
   , handle : Json.Value
+  }
+
+type alias IndexOptions =
+  { multi_entry : Bool
+  , unique : Bool
   }
 
 {-| Count the number of records within the given key range for that index
@@ -70,7 +76,7 @@ openCursor key_range direction index =
 
 {-| Open a key cursor on that index
 -}
-openKeyCursor : Maybe (KeyRange k) -> Maybe Direction -> ObjectStore -> Task Error Cursor
+openKeyCursor : Maybe (KeyRange k) -> Maybe Direction -> Index -> Task Error Cursor
 openKeyCursor key_range direction index =
   mapError promoteError (
     Native.IndexedDB.indexOpenKeyCursor index.handle (Maybe.map .handle key_range) direction

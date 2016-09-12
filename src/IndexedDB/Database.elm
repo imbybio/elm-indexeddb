@@ -25,26 +25,24 @@ close db =
 
 {-| Create an object store in a database
 -}
-createObjectStore : String -> ObjectStoreOptions -> Database -> ObjectStore
+createObjectStore : String -> ObjectStoreOptions -> Database -> Result Error ObjectStore
 createObjectStore osname osopts db =
-  Native.IndexedDB.databaseCreateObjectStore db.handle osname osopts
+  Result.formatError promoteError (
+    Native.IndexedDB.databaseCreateObjectStore db.handle osname osopts
+    )
 
 {-| Delete an object store from a database
 -}
 deleteObjectStore : String -> Database -> Result Error ()
 deleteObjectStore osname db =
-  Result.formatError promoteError (rawDeleteObjectStore osname db)
-
-rawDeleteObjectStore : String -> Database -> Result RawError ()
-rawDeleteObjectStore osname db =
-  Native.IndexedDB.databaseDeleteObjectStore db.handle osname
+  Result.formatError promoteError (
+    Native.IndexedDB.databaseDeleteObjectStore db.handle osname
+    )
 
 {-| Create a transaction to perform operations on the database
 -}
 transaction : List String -> TransactionMode -> Database -> Result Error Transaction
 transaction snames mode db =
-  Result.formatError promoteError (rawTransaction snames mode db)
-
-rawTransaction : List String -> TransactionMode -> Database -> Result RawError Transaction
-rawTransaction snames mode db =
-  Native.IndexedDB.databaseTransaction db.handle snames mode
+  Result.formatError promoteError (
+    Native.IndexedDB.databaseTransaction db.handle snames mode
+    )

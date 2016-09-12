@@ -10,6 +10,7 @@ import Task exposing (Task, andThen, mapError, succeed, fail, fromResult)
 import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
 import IndexedDB.KeyRange exposing(KeyRange)
 import IndexedDB.Cursor exposing(Cursor, Direction)
+import IndexedDB.Index exposing(Index, IndexOptions)
 import IndexedDB.Json exposing(fromJson, fromJsonList)
 import Native.IndexedDB
 
@@ -108,4 +109,28 @@ openKeyCursor : Maybe (KeyRange k) -> Maybe Direction -> ObjectStore -> Task Err
 openKeyCursor key_range direction os =
   mapError promoteError (
     Native.IndexedDB.objectStoreOpenKeyCursor os.handle (Maybe.map .handle key_range) direction
+    )
+
+{-| Create an index; this should only be called in an update needed callback
+-}
+createIndex : String -> String -> IndexOptions -> ObjectStore -> Result Error Index
+createIndex name key_path options os =
+  Result.formatError promoteError (
+    Native.IndexedDB.objectStoreCreateIndex os.handle name key_path options
+    )
+
+{-| Delete an index; this should only be called in an update needed callback
+-}
+deleteIndex : String -> ObjectStore -> Result Error ()
+deleteIndex name os =
+  Result.formatError promoteError (
+    Native.IndexedDB.objectStoreDeleteIndex os.handle name
+    )
+
+{-| Retrieve an index on an object store by name
+-}
+index : String -> ObjectStore -> Result Error Index
+index name os =
+  Result.formatError promoteError (
+    Native.IndexedDB.objectStoreIndex os.handle name
     )

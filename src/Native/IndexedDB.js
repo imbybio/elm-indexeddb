@@ -2,6 +2,8 @@
 
 var _imbybio$elm_indexeddb$Native_IndexedDB = function() {
 
+// Main entry point to get hold of the IndexedDB top level interface
+// Designed to work with https://github.com/axemclion/IndexedDBShim if present
 function getIndexedDB() {
     return window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 }
@@ -71,7 +73,11 @@ function databaseCreateObjectStore(db, osname, osopts)
     };
     // it looks like the object store creation doesn't always work properly
     // when the keyPath option is provided with a null value, as opposed to
-    // not providng it at all so we check before adding it to the structure
+    // not providing it at all so we check before adding it to the structure
+    // TODO: looking at the IDBIndex documentation, it looks like we should
+    // handle the key path as a list of strings that can potentially be empty
+    // It may be worth having a KeyPath package to manipulate those values and
+    // always provide something sensible to the JS layer
     var keyPath = fromMaybe(osopts.key_path);
     if (keyPath != null) {
         josopts.keyPath = keyPath;
@@ -306,6 +312,40 @@ function objectStoreOpenKeyCursor(os, key_range, direction)
         return function() {
         };
     });
+}
+
+function objectStoreCreateIndex(os, idxname, key_path, idxopts)
+{
+    var jidxopts = {
+        multiEntry: idxopts.multi_entry,
+        unique: idxopts.unique
+    };
+    try {
+        return toOkResult(toIndex(os.createIndex(idxname, key_path, jidxopts)));
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
+}
+
+function objectStoreDeleteIndex(os, idxname)
+{
+    try {
+        return toOkResult(os.deleteIndex(idxname));
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
+}
+
+function objectStoreIndex(os, idxname)
+{
+    try {
+        return toOkResult(toIndex(os.index(idxname)));
+    }
+    catch(err) {
+        return toErrResult(toDomException(err));
+    }
 }
 
 function keyRangeUpperBound(upper, upper_open)
@@ -707,6 +747,9 @@ return {
     objectStoreClear: objectStoreClear,
     objectStoreOpenCursor: F3(objectStoreOpenCursor),
     objectStoreOpenKeyCursor: F3(objectStoreOpenKeyCursor),
+    objectStoreCreateIndex: F4(objectStoreCreateIndex),
+    objectStoreDeleteIndex: F2(objectStoreDeleteIndex),
+    objectStoreIndex: F2(objectStoreIndex),
     keyRangeUpperBound: F2(keyRangeUpperBound),
     keyRangeLowerBound: F2(keyRangeLowerBound),
     keyRangeBound: F4(keyRangeBound),
