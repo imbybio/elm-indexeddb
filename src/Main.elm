@@ -345,6 +345,7 @@ deleteDb dbname =
 onVersionChange : IndexedDB.VersionChangeEvent -> Cmd Msg
 onVersionChange evt =
   let
+    devt = (Debug.log "evt" evt)
     os = (Debug.log "data" (Database.createObjectStore "data" {keyPath = KeyPath.none, autoIncrement = True} evt.db))
   in
     Cmd.none

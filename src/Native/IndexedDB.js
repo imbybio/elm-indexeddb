@@ -610,13 +610,15 @@ function indexOpenKeyCursor(idx, keyRange, direction)
 // data structures
 
 function toVersionchangeEvent(evt) {
-    return {
+    evt.db = evt.target.result;
+    return evt;
+    /*return {
         oldVersion: evt.oldVersion,
         newVersion: evt.newVersion,
         timestamp: evt.timestamp,
         db: toDatabase(evt.target.result),
         handle: evt
-    };
+    };*/
 }
 
 function toDatabase(db) {
@@ -647,13 +649,14 @@ function toTransaction(t) {
 }
 
 function toKeyRange(kr) {
-    return {
+    return kr;
+    /*return {
         lower: toMaybe(kr.lower),
         upper: toMaybe(kr.upper),
         lowerOpen: kr.lowerOpen,
         upperOpen: kr.upperOpen,
         handle: kr
-    };
+    };*/
 }
 
 function toCursor(c) {
