@@ -622,12 +622,12 @@ function toVersionchangeEvent(evt) {
 }
 
 function toDatabase(db) {
-    //return db;
-    return {
+    return db;
+    /*return {
         name: db.name,
         version: db.version,
         handle: db
-    };
+    };*/
 }
 
 function toObjectStore(os) {

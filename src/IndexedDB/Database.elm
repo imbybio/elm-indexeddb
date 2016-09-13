@@ -28,14 +28,14 @@ import Native.IndexedDB
 type alias Database =
   { name: String
   , version: Int
-  , handle: Json.Value
+  --, handle: Json.Value
   }
 
 {-| Close an open database.
 -}
 close : Database -> ()
 close db =
-  Native.IndexedDB.databaseClose {-db-} db.handle
+  Native.IndexedDB.databaseClose db {-db.handle-}
 
 {-| Create an object store in a database.
 
@@ -45,7 +45,7 @@ of a call to `IndexedDB.open`.
 createObjectStore : String -> ObjectStoreOptions -> Database -> Result Error ObjectStore
 createObjectStore osname osopts db =
   Result.formatError promoteError (
-    Native.IndexedDB.databaseCreateObjectStore {-db-} db.handle osname osopts
+    Native.IndexedDB.databaseCreateObjectStore db {-db.handle-} osname osopts
     )
 
 {-| Delete an object store from a database.
@@ -56,7 +56,7 @@ of a call to `IndexedDB.open`.
 deleteObjectStore : String -> Database -> Result Error ()
 deleteObjectStore osname db =
   Result.formatError promoteError (
-    Native.IndexedDB.databaseDeleteObjectStore {-db-} db.handle osname
+    Native.IndexedDB.databaseDeleteObjectStore db {-db.handle-} osname
     )
 
 {-| Create a transaction to perform operations on the database.
@@ -69,5 +69,5 @@ object store within that transaction context.
 transaction : List String -> TransactionMode -> Database -> Result Error Transaction
 transaction osnames mode db =
   Result.formatError promoteError (
-    Native.IndexedDB.databaseTransaction {-db-} db.handle osnames mode
+    Native.IndexedDB.databaseTransaction db {-db.handle-} osnames mode
     )
