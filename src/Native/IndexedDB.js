@@ -639,11 +639,12 @@ function toObjectStore(os) {
 }
 
 function toTransaction(t) {
-    return {
+    return t;
+    /*return {
         mode: toTransactionMode(t.mode),
         objectStoreNames: _elm_lang$core$Native_List.fromArray(t.objectStoreNames),
         handle: t
-    };
+    };*/
 }
 
 function toKeyRange(kr) {

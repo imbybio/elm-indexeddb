@@ -24,7 +24,7 @@ import Native.IndexedDB
 type alias Transaction =
   { mode: TransactionMode
   , objectStoreNames: List String
-  , handle: Json.Value
+  --, handle: Json.Value
   }
 
 {-| Transaction mode.
@@ -38,7 +38,7 @@ type TransactionMode
 abort : Transaction -> Result Error ()
 abort transaction =
   Result.formatError promoteError (
-    Native.IndexedDB.transactionAbort transaction.handle
+    Native.IndexedDB.transactionAbort transaction {-transaction.handle-}
     )
 
 {-| Get an object store from a transaction.
@@ -48,5 +48,5 @@ object store that was provided when created the transaction context.
 objectStore : String -> Transaction -> Result Error ObjectStore
 objectStore osname transaction =
   Result.formatError promoteError (
-    Native.IndexedDB.transactionObjectStore transaction.handle osname
+    Native.IndexedDB.transactionObjectStore transaction {-transaction.handle-} osname
     )
