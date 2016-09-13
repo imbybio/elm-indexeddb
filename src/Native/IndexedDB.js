@@ -705,6 +705,22 @@ function toTransactionMode(v) {
     }
 }
 
+function fromKeyPath(kp) {
+    return _elm_lang$core$Native_List.toArray(kp._0);
+}
+
+function toKeyPath(v) {
+    // This assumes that the JS value passed is a key path that would be
+    // considered valid by IndexedDB
+    if(v == null) {
+        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray([]) };
+    } else if(typeof v == "string") {
+        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray(v.split(".")) }
+    } else {
+        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray(v) }
+    }
+}
+
 // Utility functions to transform simple objects to and from Elm
 
 function fromMaybe(m) {
@@ -756,12 +772,15 @@ return {
     open: F3(open),
     deleteDatabase: deleteDatabase,
     cmp: F2(cmp),
+
     databaseClose: databaseClose,
     databaseCreateObjectStore: F3(databaseCreateObjectStore),
     databaseDeleteObjectStore: F2(databaseDeleteObjectStore),
     databaseTransaction: F3(databaseTransaction),
+
     transactionAbort: transactionAbort,
     transactionObjectStore: F2(transactionObjectStore),
+
     objectStoreAdd: F3(objectStoreAdd),
     objectStorePut: F3(objectStorePut),
     objectStoreDelete: F2(objectStoreDelete),
@@ -775,11 +794,13 @@ return {
     objectStoreCreateIndex: F4(objectStoreCreateIndex),
     objectStoreDeleteIndex: F2(objectStoreDeleteIndex),
     objectStoreIndex: F2(objectStoreIndex),
+
     keyRangeUpperBound: F2(keyRangeUpperBound),
     keyRangeLowerBound: F2(keyRangeLowerBound),
     keyRangeBound: F4(keyRangeBound),
     keyRangeOnly: keyRangeOnly,
     keyRangeIncludes: F2(keyRangeIncludes),
+
     cursorKey: cursorKey,
     cursorPrimaryKey: cursorPrimaryKey,
     cursorValue: cursorValue,
@@ -787,6 +808,7 @@ return {
     cursorContinue: F2(cursorContinue),
     cursorDelete: cursorDelete,
     cursorUpdate: F2(cursorUpdate),
+
     indexCount: indexCount,
     indexGet: F2(indexGet),
     indexGetAll: F3(indexGetAll),

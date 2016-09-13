@@ -30,6 +30,7 @@ import IndexedDB.KeyRange exposing(KeyRange)
 import IndexedDB.Cursor exposing(Cursor, Direction)
 import IndexedDB.Index exposing(Index, IndexOptions)
 import IndexedDB.Json exposing(fromJson, fromJsonList)
+import IndexedDB.KeyPath exposing(KeyPath)
 import Native.IndexedDB
 
 {-| Object store data structure
@@ -44,7 +45,7 @@ type alias ObjectStore =
 context.
 -}
 type alias ObjectStoreOptions =
-  { key_path: Maybe String
+  { key_path: KeyPath
   , auto_increment: Bool
   }
 
@@ -137,7 +138,7 @@ openKeyCursor key_range direction os =
 
 {-| Create an index; this should only be called in an update needed callback
 -}
-createIndex : String -> String -> IndexOptions -> ObjectStore -> Result Error Index
+createIndex : String -> KeyPath -> IndexOptions -> ObjectStore -> Result Error Index
 createIndex name key_path options os =
   Result.formatError promoteError (
     Native.IndexedDB.objectStoreCreateIndex os.handle name key_path options

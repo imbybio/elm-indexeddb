@@ -12,6 +12,7 @@ import IndexedDB.Database as Database
 import IndexedDB.Transaction as Transaction
 import IndexedDB.ObjectStore as ObjectStore
 import IndexedDB.Error as Error
+import IndexedDB.KeyPath as KeyPath
 
 main =
   App.program
@@ -342,7 +343,7 @@ deleteDb dbname =
 onVersionChange : IndexedDB.VersionChangeEvent -> Bool
 onVersionChange evt =
   let
-    os = Database.createObjectStore "data" {key_path = Nothing, auto_increment = True} evt.db
+    os = Database.createObjectStore "data" {key_path = KeyPath.none, auto_increment = True} evt.db
   in
     True
 

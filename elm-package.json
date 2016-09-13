@@ -9,7 +9,8 @@
     "exposed-modules": [
         "IndexedDB", "IndexedDB.Database", "IndexedDB.Transaction",
         "IndexedDB.ObjectStore", "IndexedDB.Index", "IndexedDB.Cursor",
-        "IndexedDB.Error", "IndexedDB.KeyRange", "IndexedDB.Json"
+        "IndexedDB.Error", "IndexedDB.KeyRange", "IndexedDB.Json",
+        "IndexedDB.KeyPath"
     ],
     "native-modules": true,
     "dependencies": {
