@@ -342,12 +342,12 @@ deleteDb : String -> Cmd Msg
 deleteDb dbname =
   Task.perform DeleteDbOnError DeleteDbOnSuccess (IndexedDB.deleteDatabase dbname)
 
-onVersionChange : IndexedDB.VersionChangeEvent -> Bool
+onVersionChange : IndexedDB.VersionChangeEvent -> Cmd Msg
 onVersionChange evt =
   let
     os = (Debug.log "data" (Database.createObjectStore "data" {keyPath = KeyPath.none, autoIncrement = True} evt.db))
   in
-    True
+    Cmd.none
 
 addItem : String -> Database.Database -> Cmd Msg
 addItem value db =

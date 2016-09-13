@@ -47,7 +47,7 @@ to perform any necessary upgrade. Note that this function needs to run within
 the same transaction context as the `open` call and therefore all key operations
 performed by that function should be synchronous.
 -}
-open : String -> Int -> (VersionChangeEvent -> Bool) -> Task Error Database
+open : String -> Int -> (VersionChangeEvent -> Cmd msg) -> Task Error Database
 open dbname dbvsn onvsnchange =
   mapError promoteError (
     Native.IndexedDB.open dbname dbvsn onvsnchange
