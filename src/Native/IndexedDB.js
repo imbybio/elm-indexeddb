@@ -77,21 +77,25 @@ function databaseClose(db)
 function databaseCreateObjectStore(db, osname, osopts)
 {
     var josopts = {
-        autoIncrement: osopts.autoIncrement,
+        autoIncrement: osopts.autoIncrement
     };
     // it looks like the object store creation doesn't always work properly
     // when the keyPath option is provided with a null value, as opposed to
     // not providing it at all so we check before adding it to the structure
     // TODO: looking at the IDBIndex documentation, it looks like we should
-    // handle the key path as a list of strings that can potentially be empty
-    // It may be worth having a KeyPath package to manipulate those values and
-    // always provide something sensible to the JS layer
+    // handle the key path as a list of strings that can potentially be empty.
+    // However, passing an array of 0 strings makes the operation fail so we
+    // need to catch that use case
     var keyPath = fromKeyPath(osopts.keyPath);
-    if (keyPath != null) {
+    if (keyPath.length > 0) {
         josopts.keyPath = keyPath;
     }
     try {
-        return toOkResult(toObjectStore(db.createObjectStore(osname, josopts)));
+        // TODO: this operation is not very robust and needs testing with a
+        // variety of key paths to understand exactly how those paths work
+        var os = db.createObjectStore(osname, josopts);
+        var r = toObjectStore(os);
+        return toOkResult(r);
     }
     catch(err) {
         return toErrResult(toDomException(err));
@@ -606,6 +610,8 @@ function indexOpenKeyCursor(idx, keyRange, direction)
 // data structures
 
 function toVersionchangeEvent(evt) {
+    console.log("Event result:");
+    console.log(evt.target.result);
     return {
         oldVersion: evt.oldVersion,
         newVersion: evt.newVersion,
@@ -616,12 +622,12 @@ function toVersionchangeEvent(evt) {
 }
 
 function toDatabase(db) {
-    return db;
-    /*return {
+    //return db;
+    return {
         name: db.name,
         version: db.version,
         handle: db
-    };*/
+    };
 }
 
 function toObjectStore(os) {
@@ -717,9 +723,9 @@ function toKeyPath(v) {
     if(v == null) {
         return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray([]) };
     } else if(typeof v == "string") {
-        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray(v.split(".")) }
+        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray(v.split(".")) };
     } else {
-        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray(v) }
+        return { ctor: 'KP', _0: _elm_lang$core$Native_List.fromArray(v) };
     }
 }
 

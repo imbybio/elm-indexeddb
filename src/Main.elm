@@ -7,6 +7,8 @@ import Html.App as App
 import Json.Decode as Json
 import Task
 
+import Debug
+
 import IndexedDB
 import IndexedDB.Database as Database
 import IndexedDB.Transaction as Transaction
@@ -343,7 +345,7 @@ deleteDb dbname =
 onVersionChange : IndexedDB.VersionChangeEvent -> Bool
 onVersionChange evt =
   let
-    os = Database.createObjectStore "data" {keyPath = KeyPath.none, autoIncrement = True} evt.db
+    os = (Debug.log "data" (Database.createObjectStore "data" {keyPath = KeyPath.none, autoIncrement = True} evt.db))
   in
     True
 
