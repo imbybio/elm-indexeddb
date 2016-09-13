@@ -610,8 +610,6 @@ function indexOpenKeyCursor(idx, keyRange, direction)
 // data structures
 
 function toVersionchangeEvent(evt) {
-    console.log("Event result:");
-    console.log(evt.target.result);
     return {
         oldVersion: evt.oldVersion,
         newVersion: evt.newVersion,
@@ -631,11 +629,12 @@ function toDatabase(db) {
 }
 
 function toObjectStore(os) {
-    return {
+    return os;
+    /*return {
         name: os.name,
         autoIncrement: os.autoIncrement,
         handle: os
-    };
+    };*/
 }
 
 function toTransaction(t) {
@@ -658,10 +657,11 @@ function toKeyRange(kr) {
 }
 
 function toCursor(c) {
-    return {
+    return c;
+    /*return {
         direction : toCursorDirecton(c.direction),
         handle: c
-    };
+    };*/
 }
 
 function toCursorDirection(d) {
@@ -689,12 +689,13 @@ function fromCursorDirection(d) {
 }
 
 function toIndex(idx) {
-    return {
+    return idx;
+    /*return {
         name : idx.name,
         multiEntry : idx.multiEntry,
         unique : idx.unique,
         handle: idx
-    };
+    };*/
 }
 
 function fromTransactionMode(m) {

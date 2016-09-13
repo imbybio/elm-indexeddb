@@ -38,7 +38,7 @@ import Native.IndexedDB
 type alias ObjectStore =
   { name: String
   , autoIncrement: Bool
-  , handle: Json.Value
+  --, handle: Json.Value
   }
 
 {-| Object store options passed to the `objectStore` call within a transaction
@@ -54,7 +54,7 @@ type alias ObjectStoreOptions =
 add : v -> Maybe k -> ObjectStore -> Task Error k
 add value m_key os =
   mapError promoteError (
-    Native.IndexedDB.objectStoreAdd os.handle value m_key
+    Native.IndexedDB.objectStoreAdd os {-os.handle-} value m_key
     )
 
 {-| Put an item into an object store, in effect doing a add or update.
@@ -62,7 +62,7 @@ add value m_key os =
 put : v -> Maybe k -> ObjectStore -> Task Error k
 put value m_key os =
   mapError promoteError (
-    Native.IndexedDB.objectStorePut os.handle value m_key
+    Native.IndexedDB.objectStorePut os {-os.handle-} value m_key
     )
 
 {-| Delete an item from an object store.
@@ -70,7 +70,7 @@ put value m_key os =
 delete : k -> ObjectStore -> Task Error k
 delete key os =
   mapError promoteError (
-    Native.IndexedDB.objectStoreDelete os.handle key
+    Native.IndexedDB.objectStoreDelete os {-os.handle-} key
     )
 
 {-| Get a string from an object store.
@@ -84,7 +84,7 @@ getString key os =
 get : Json.Decoder v -> k -> ObjectStore -> Task Error (Maybe v)
 get decoder key os =
   fromJson decoder (
-    Native.IndexedDB.objectStoreGet os.handle key
+    Native.IndexedDB.objectStoreGet os {-os.handle-} key
     )
 
 {-| Get all values matching the given key range; will default to all values
@@ -93,7 +93,7 @@ if no key range is specified.
 getAll : Json.Decoder v -> Maybe (KeyRange k) -> Maybe Int -> ObjectStore -> Task Error (List v)
 getAll decoder key_range count os =
   fromJsonList decoder (
-    Native.IndexedDB.objectStoreGetAll os.handle (Maybe.map .handle key_range) count
+    Native.IndexedDB.objectStoreGetAll os {-os.handle-} key_range count
     )
 
 {-| Get all keys for items in the store matching the given key range; defaults
@@ -102,7 +102,7 @@ to all keys if no key range is specified.
 getAllKeys : Maybe (KeyRange k) -> Maybe Int -> ObjectStore -> Task Error (List k)
 getAllKeys key_range count os =
   mapError promoteError (
-    Native.IndexedDB.objectStoreGetAllKeys os.handle (Maybe.map .handle key_range) count
+    Native.IndexedDB.objectStoreGetAllKeys os {-os.handle-} key_range count
     )
 
 {-| Count the number of items in the store matching the given key range;
@@ -111,21 +111,21 @@ defaults to full store count if no key range is specified
 count : Maybe (KeyRange k) -> ObjectStore -> Task Error Int
 count key_range os =
   mapError promoteError (
-    Native.IndexedDB.objectStoreCount os.handle (Maybe.map .handle key_range)
+    Native.IndexedDB.objectStoreCount os {-os.handle-} key_range
     )
 
 {-| Clear an object store
 -}
 clear : ObjectStore -> Task Error ()
 clear os =
-  mapError promoteError (Native.IndexedDB.objectStoreClear os.handle)
+  mapError promoteError (Native.IndexedDB.objectStoreClear os {-os.handle-})
 
 {-| Open a cursor on that object store
 -}
 openCursor : Maybe (KeyRange k) -> Maybe Direction -> ObjectStore -> Task Error Cursor
 openCursor key_range direction os =
   mapError promoteError (
-    Native.IndexedDB.objectStoreOpenCursor os.handle (Maybe.map .handle key_range) direction
+    Native.IndexedDB.objectStoreOpenCursor os {-os.handle-} key_range direction
     )
 
 {-| Open a key cursor on that object store
@@ -133,7 +133,7 @@ openCursor key_range direction os =
 openKeyCursor : Maybe (KeyRange k) -> Maybe Direction -> ObjectStore -> Task Error Cursor
 openKeyCursor key_range direction os =
   mapError promoteError (
-    Native.IndexedDB.objectStoreOpenKeyCursor os.handle (Maybe.map .handle key_range) direction
+    Native.IndexedDB.objectStoreOpenKeyCursor os {-os.handle-} key_range direction
     )
 
 {-| Create an index; this should only be called in an update needed callback
@@ -141,7 +141,7 @@ openKeyCursor key_range direction os =
 createIndex : String -> KeyPath -> IndexOptions -> ObjectStore -> Result Error Index
 createIndex name key_path options os =
   Result.formatError promoteError (
-    Native.IndexedDB.objectStoreCreateIndex os.handle name key_path options
+    Native.IndexedDB.objectStoreCreateIndex os {-os.handle-} name key_path options
     )
 
 {-| Delete an index; this should only be called in an update needed callback
@@ -149,7 +149,7 @@ createIndex name key_path options os =
 deleteIndex : String -> ObjectStore -> Result Error ()
 deleteIndex name os =
   Result.formatError promoteError (
-    Native.IndexedDB.objectStoreDeleteIndex os.handle name
+    Native.IndexedDB.objectStoreDeleteIndex os {-os.handle-} name
     )
 
 {-| Retrieve an index on an object store by name
@@ -157,5 +157,5 @@ deleteIndex name os =
 index : String -> ObjectStore -> Result Error Index
 index name os =
   Result.formatError promoteError (
-    Native.IndexedDB.objectStoreIndex os.handle name
+    Native.IndexedDB.objectStoreIndex os {-os.handle-} name
     )

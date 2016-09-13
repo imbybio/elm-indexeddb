@@ -27,7 +27,7 @@ import Native.IndexedDB
 -}
 type alias Cursor =
   { direction : Direction
-  , handle : Json.Value
+  --, handle : Json.Value
   }
 
 {-| Cursor direction
@@ -42,7 +42,7 @@ type Direction
 -}
 key : Cursor -> k
 key cursor =
-  Native.IndexedDB.cursorKey cursor.handle
+  Native.IndexedDB.cursorKey cursor {-cursor.handle-}
 
 {-| Return the current primary key for the cursor; this value will be the
 same as `key` if the cursor was open via the `ObjectStore` interface but may
@@ -50,20 +50,20 @@ be different if it was open via the `Index` interface.
 -}
 primaryKey : Cursor -> pk
 primaryKey cursor =
-  Native.IndexedDB.cursorPrimaryKey cursor.handle
+  Native.IndexedDB.cursorPrimaryKey cursor {-cursor.handle-}
 
 {-| Return the current value of the cursor.
 -}
 value : Json.Decoder v -> Cursor -> Result String v
 value decoder cursor =
-  Json.decodeValue decoder (Native.IndexedDB.cursorValue cursor.handle)
+  Json.decodeValue decoder (Native.IndexedDB.cursorValue cursor {-cursor.handle-})
 
 {-| Advance the cursor by the given count.
 -}
 advance : Int -> Cursor -> Result Error ()
 advance count cursor =
   Result.formatError promoteError(
-    Native.IndexedDB.cursorAdvance cursor.handle count
+    Native.IndexedDB.cursorAdvance cursor {-cursor.handle-} count
     )
 
 {-| Continue to the next item in the cursor as identified by the given key. If
@@ -72,7 +72,7 @@ no key is given, continue to the next item.
 continue : Maybe k -> Cursor -> Result Error ()
 continue key cursor =
   Result.formatError promoteError(
-    Native.IndexedDB.cursorContinue cursor.handle key
+    Native.IndexedDB.cursorContinue cursor {-cursor.handle-} key
     )
 
 {-| Delete the item currently pointed to by the cursor.
@@ -80,7 +80,7 @@ continue key cursor =
 delete : Cursor -> Task Error ()
 delete cursor =
   mapError promoteError (
-    Native.IndexedDB.cursorDelete cursor.handle
+    Native.IndexedDB.cursorDelete cursor {-cursor.handle-}
     )
 
 {-| Update the item currently pointed to by the cursor.
@@ -88,5 +88,5 @@ delete cursor =
 update : v -> Cursor -> Task Error ()
 update value cursor =
   mapError promoteError (
-    Native.IndexedDB.cursorUpdate cursor.handle value
+    Native.IndexedDB.cursorUpdate cursor {-cursor.handle-} value
     )
