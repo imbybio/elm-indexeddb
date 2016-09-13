@@ -37,7 +37,6 @@ type alias VersionChangeEvent =
   , newVersion: Int
   , timestamp: Time
   , db: Database
-  --, handle: Json.Value
   }
 
 {-| Open a database given its name and version. If the named database was

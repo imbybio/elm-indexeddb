@@ -15,7 +15,6 @@ module IndexedDB.KeyRange exposing
 -}
 
 import Json.Decode as Json
---import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
 import Native.IndexedDB
 
 {-| KeyRange data structure
@@ -25,7 +24,6 @@ type alias KeyRange k =
   , upper : Maybe k
   , lowerOpen : Bool
   , upperOpen : Bool
-  --, handle : Json.Value
   }
 
 {-| Create a key range with an upper bound
@@ -56,4 +54,4 @@ only value =
 -}
 includes : k -> KeyRange k -> Bool
 includes value key_range =
-  Native.IndexedDB.keyRangeIncludes key_range {-key_range.handle-} value
+  Native.IndexedDB.keyRangeIncludes key_range value

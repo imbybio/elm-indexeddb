@@ -397,17 +397,17 @@ function keyRangeIncludes(kr, value)
 
 function cursorKey(cursor)
 {
-    return cursor.key;
+    return fromCursor(cursor).key;
 }
 
 function cursorPrimaryKey(cursor)
 {
-    return cursor.primaryKey;
+    return fromCursor(cursor).primaryKey;
 }
 
 function cursorValue(cursor)
 {
-    return cursor.value;
+    return fromCursor(cursor).value;
 }
 
 function cursorAdvance(cursor, count)
@@ -415,9 +415,9 @@ function cursorAdvance(cursor, count)
     var jcount = fromMaybe(count);
     try {
         if (jcount == null) {
-            return toOkResult(cursor.advance());
+            return toOkResult(fromCursor(cursor).advance());
         } else {
-            return toOkResult(cursor.advance(jcount));
+            return toOkResult(fromCursor(cursor).advance(jcount));
         }
     }
     catch(err) {
@@ -430,9 +430,9 @@ function cursorContinue(cursor, key)
     var jkey = fromMaybe(key);
     try {
         if (jkey == null) {
-            return toOkResult(cursor.continue());
+            return toOkResult(fromCursor(cursor).continue());
         } else {
-            return toOkResult(cursor.continue(jkey));
+            return toOkResult(fromCursor(cursor).continue(jkey));
         }
     }
     catch(err) {
@@ -443,7 +443,7 @@ function cursorContinue(cursor, key)
 function cursorDelete(cursor)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = cursor.delete();
+        var req = fromCursor(cursor).delete();
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -459,7 +459,7 @@ function cursorDelete(cursor)
 function cursorUpdate(cursor, value)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = cursor.update(value);
+        var req = fromCursor(cursor).update(value);
         req.addEventListener('error', function(evt) {
             return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
         });
@@ -612,59 +612,32 @@ function indexOpenKeyCursor(idx, keyRange, direction)
 function toVersionchangeEvent(evt) {
     evt.db = evt.target.result;
     return evt;
-    /*return {
-        oldVersion: evt.oldVersion,
-        newVersion: evt.newVersion,
-        timestamp: evt.timestamp,
-        db: toDatabase(evt.target.result),
-        handle: evt
-    };*/
 }
 
 function toDatabase(db) {
     return db;
-    /*return {
-        name: db.name,
-        version: db.version,
-        handle: db
-    };*/
 }
 
 function toObjectStore(os) {
     return os;
-    /*return {
-        name: os.name,
-        autoIncrement: os.autoIncrement,
-        handle: os
-    };*/
 }
 
 function toTransaction(t) {
     return t;
-    /*return {
-        mode: toTransactionMode(t.mode),
-        objectStoreNames: _elm_lang$core$Native_List.fromArray(t.objectStoreNames),
-        handle: t
-    };*/
 }
 
 function toKeyRange(kr) {
     return kr;
-    /*return {
-        lower: toMaybe(kr.lower),
-        upper: toMaybe(kr.upper),
-        lowerOpen: kr.lowerOpen,
-        upperOpen: kr.upperOpen,
-        handle: kr
-    };*/
 }
 
 function toCursor(c) {
+    c.direction = toCursorDirection(c.direction);
     return c;
-    /*return {
-        direction : toCursorDirecton(c.direction),
-        handle: c
-    };*/
+}
+
+function fromCursor(c) {
+    c.direction = fromCursorDirection(c.direction);
+    return c;
 }
 
 function toCursorDirection(d) {
@@ -693,12 +666,6 @@ function fromCursorDirection(d) {
 
 function toIndex(idx) {
     return idx;
-    /*return {
-        name : idx.name,
-        multiEntry : idx.multiEntry,
-        unique : idx.unique,
-        handle: idx
-    };*/
 }
 
 function fromTransactionMode(m) {

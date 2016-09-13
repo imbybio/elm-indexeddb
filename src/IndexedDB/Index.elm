@@ -29,7 +29,6 @@ type alias Index =
   { name : String
   , multiEntry : Bool
   , unique : Bool
-  --, handle : Json.Value
   }
 
 {-| Index options data structure, used when creating the index.
@@ -44,14 +43,14 @@ type alias IndexOptions =
 count : Maybe (KeyRange k) -> Index -> Task Error Int
 count key_range index =
   mapError promoteError (
-    Native.IndexedDB.indexCount index {-index.handle-} key_range
+    Native.IndexedDB.indexCount index key_range
     )
 
 {-| Get a value from an index and decode it
 -}
 get : Json.Decoder v -> k -> Index -> Task Error (Maybe v)
 get decoder key index =
-  fromJson decoder (Native.IndexedDB.indexGet index {-index.handle-} key)
+  fromJson decoder (Native.IndexedDB.indexGet index key)
 
 {-| Get all values matching the given key range; will default to all values
 if no key range is specified.
@@ -59,7 +58,7 @@ if no key range is specified.
 getAll : Json.Decoder v -> Maybe (KeyRange k) -> Maybe Int -> Index -> Task Error (List v)
 getAll decoder key_range count index =
   fromJsonList decoder (
-    Native.IndexedDB.indexGetAll index {-index.handle-} key_range count
+    Native.IndexedDB.indexGetAll index key_range count
     )
 
 {-| Get a record's primary key based on an index key
@@ -67,7 +66,7 @@ getAll decoder key_range count index =
 getKey : k -> Index -> Task Error pk
 getKey index_key index =
   mapError promoteError (
-    Native.IndexedDB.indexGetKey index {-index.handle-} index_key
+    Native.IndexedDB.indexGetKey index index_key
     )
 
 {-| Get all primary keys matching the given index key range; will default to
@@ -76,7 +75,7 @@ all keys if no index key range is specified
 getAllKeys : Maybe (KeyRange k) -> Index -> Task Error (List pk)
 getAllKeys key_range index =
   mapError promoteError (
-    Native.IndexedDB.indexGetAllKeys index {-index.handle-} key_range
+    Native.IndexedDB.indexGetAllKeys index key_range
     )
 
 {-| Open a cursor on that index
@@ -84,7 +83,7 @@ getAllKeys key_range index =
 openCursor : Maybe (KeyRange k) -> Maybe Direction -> Index -> Task Error Cursor
 openCursor key_range direction index =
   mapError promoteError (
-    Native.IndexedDB.indexOpenCursor index {-index.handle-} key_range direction
+    Native.IndexedDB.indexOpenCursor index key_range direction
     )
 
 {-| Open a key cursor on that index
@@ -92,5 +91,5 @@ openCursor key_range direction index =
 openKeyCursor : Maybe (KeyRange k) -> Maybe Direction -> Index -> Task Error Cursor
 openKeyCursor key_range direction index =
   mapError promoteError (
-    Native.IndexedDB.indexOpenKeyCursor index {-index.handle-} key_range direction
+    Native.IndexedDB.indexOpenKeyCursor index key_range direction
     )
