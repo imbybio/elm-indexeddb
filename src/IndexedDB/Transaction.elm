@@ -23,7 +23,7 @@ import Native.IndexedDB
 -}
 type alias Transaction =
   { mode: TransactionMode
-  , object_store_names: List String
+  , objectStoreNames: List String
   , handle: Json.Value
   }
 

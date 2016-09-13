@@ -37,7 +37,7 @@ import Native.IndexedDB
 -}
 type alias ObjectStore =
   { name: String
-  , auto_increment: Bool
+  , autoIncrement: Bool
   , handle: Json.Value
   }
 
@@ -45,8 +45,8 @@ type alias ObjectStore =
 context.
 -}
 type alias ObjectStoreOptions =
-  { key_path: KeyPath
-  , auto_increment: Bool
+  { keyPath: KeyPath
+  , autoIncrement: Bool
   }
 
 {-| Add an item to an object store, will fail if the key already exists.

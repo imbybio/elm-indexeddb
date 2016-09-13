@@ -343,7 +343,7 @@ deleteDb dbname =
 onVersionChange : IndexedDB.VersionChangeEvent -> Bool
 onVersionChange evt =
   let
-    os = Database.createObjectStore "data" {key_path = KeyPath.none, auto_increment = True} evt.db
+    os = Database.createObjectStore "data" {keyPath = KeyPath.none, autoIncrement = True} evt.db
   in
     True
 

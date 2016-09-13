@@ -27,7 +27,7 @@ import Native.IndexedDB
 -}
 type alias Index =
   { name : String
-  , multi_entry : Bool
+  , multiEntry : Bool
   , unique : Bool
   , handle : Json.Value
   }
@@ -35,7 +35,7 @@ type alias Index =
 {-| Index options data structure, used when creating the index.
 -}
 type alias IndexOptions =
-  { multi_entry : Bool
+  { multiEntry : Bool
   , unique : Bool
   }
 

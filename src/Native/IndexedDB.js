@@ -77,7 +77,7 @@ function databaseClose(db)
 function databaseCreateObjectStore(db, osname, osopts)
 {
     var josopts = {
-        autoIncrement: osopts.auto_increment,
+        autoIncrement: osopts.autoIncrement,
     };
     // it looks like the object store creation doesn't always work properly
     // when the keyPath option is provided with a null value, as opposed to
@@ -86,7 +86,7 @@ function databaseCreateObjectStore(db, osname, osopts)
     // handle the key path as a list of strings that can potentially be empty
     // It may be worth having a KeyPath package to manipulate those values and
     // always provide something sensible to the JS layer
-    var keyPath = fromMaybe(osopts.key_path);
+    var keyPath = fromKeyPath(osopts.keyPath);
     if (keyPath != null) {
         josopts.keyPath = keyPath;
     }
@@ -210,10 +210,10 @@ function objectStoreGet(os, key)
     });
 }
 
-function objectStoreGetAll(os, key_range, count)
+function objectStoreGetAll(os, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jcount = fromMaybe(count);
         // TODO: check that this works even if jkr and/or jcount are null
         var req = os.getAll(jkr, jcount);
@@ -230,10 +230,10 @@ function objectStoreGetAll(os, key_range, count)
     });
 }
 
-function objectStoreGetAllKeys(os, key_range, count)
+function objectStoreGetAllKeys(os, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jcount = fromMaybe(count);
         // TODO: check that this works even if jkr and/or jcount are null
         var req = os.getAllKeys(jkr, jcount);
@@ -250,10 +250,10 @@ function objectStoreGetAllKeys(os, key_range, count)
     });
 }
 
-function objectStoreCount(os, key_range)
+function objectStoreCount(os, keyRange)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         // TODO: check that this works even if jkr is null
         var req = os.count(jkr);
         req.addEventListener('error', function(evt) {
@@ -284,10 +284,10 @@ function objectStoreClear(os)
     });
 }
 
-function objectStoreOpenCursor(os, key_range, direction)
+function objectStoreOpenCursor(os, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jdir = fromMaybe(direction);
         if (jdir != null) {
             jdir = fromCursorDirection(jdir);
@@ -305,10 +305,10 @@ function objectStoreOpenCursor(os, key_range, direction)
     });
 }
 
-function objectStoreOpenKeyCursor(os, key_range, direction)
+function objectStoreOpenKeyCursor(os, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jdir = fromMaybe(direction);
         if (jdir != null) {
             jdir = fromCursorDirection(jdir);
@@ -326,14 +326,15 @@ function objectStoreOpenKeyCursor(os, key_range, direction)
     });
 }
 
-function objectStoreCreateIndex(os, idxname, key_path, idxopts)
+function objectStoreCreateIndex(os, idxname, keyPath, idxopts)
 {
     var jidxopts = {
-        multiEntry: idxopts.multi_entry,
+        multiEntry: idxopts.multiEntry,
         unique: idxopts.unique
     };
+    var jkeyPath = fromKeyPath(keyPath);
     try {
-        return toOkResult(toIndex(os.createIndex(idxname, key_path, jidxopts)));
+        return toOkResult(toIndex(os.createIndex(idxname, jkeyPath, jidxopts)));
     }
     catch(err) {
         return toErrResult(toDomException(err));
@@ -362,20 +363,20 @@ function objectStoreIndex(os, idxname)
 
 // IDBKeyRange functions
 
-function keyRangeUpperBound(upper, upper_open)
+function keyRangeUpperBound(upper, upperOpen)
 {
     // How do we ensure the IDBKeyRange interface is the correct one?
-    return toKeyRange(IDBKeyRange.upperBound(upper, upper_open));
+    return toKeyRange(IDBKeyRange.upperBound(upper, upperOpen));
 }
 
-function keyRangeLowerBound(lower, lower_open)
+function keyRangeLowerBound(lower, lowerOpen)
 {
-    return toKeyRange(IDBKeyRange.lowerBound(lower, lower_open));
+    return toKeyRange(IDBKeyRange.lowerBound(lower, lowerOpen));
 }
 
-function keyRangeBound(lower, upper, lower_open, upper_open)
+function keyRangeBound(lower, upper, lowerOpen, upperOpen)
 {
-    return toKeyRange(IDBKeyRange.bound(lower, upper, lower_open, upper_open));
+    return toKeyRange(IDBKeyRange.bound(lower, upper, lowerOpen, upperOpen));
 }
 
 function keyRangeOnly(value)
@@ -469,10 +470,10 @@ function cursorUpdate(cursor, value)
 
 // IDBIndex functions
 
-function indexCount(idx, key_range)
+function indexCount(idx, keyRange)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         // TODO: check that this works even if jkr is null
         var req = idx.count(jkr);
         req.addEventListener('error', function(evt) {
@@ -503,10 +504,10 @@ function indexGet(idx, key)
     });
 }
 
-function indexGetAll(idx, key_range, count)
+function indexGetAll(idx, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jcount = fromMaybe(count);
         // TODO: check that this works even if jkr and/or jcount are null
         var req = idx.getAll(jkr, jcount);
@@ -539,10 +540,10 @@ function indexGetKey(idx, key)
     });
 }
 
-function indexGetAllKeys(idx, key_range, count)
+function indexGetAllKeys(idx, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jcount = fromMaybe(count);
         // TODO: check that this works even if jkr and/or jcount are null
         var req = idx.getAllKeys(jkr, jcount);
@@ -559,10 +560,10 @@ function indexGetAllKeys(idx, key_range, count)
     });
 }
 
-function indexOpenCursor(idx, key_range, direction)
+function indexOpenCursor(idx, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jdir = fromMaybe(direction);
         if (jdir != null) {
             jdir = fromCursorDirection(jdir);
@@ -580,10 +581,10 @@ function indexOpenCursor(idx, key_range, direction)
     });
 }
 
-function indexOpenKeyCursor(idx, key_range, direction)
+function indexOpenKeyCursor(idx, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(key_range);
+        var jkr = fromMaybe(keyRange);
         var jdir = fromMaybe(direction);
         if (jdir != null) {
             jdir = fromCursorDirection(jdir);
@@ -606,8 +607,8 @@ function indexOpenKeyCursor(idx, key_range, direction)
 
 function toVersionchangeEvent(evt) {
     return {
-        old_version: evt.oldVersion,
-        new_version: evt.newVersion,
+        oldVersion: evt.oldVersion,
+        newVersion: evt.newVersion,
         timestamp: evt.timestamp,
         db: toDatabase(evt.target.result),
         handle: evt
@@ -615,17 +616,18 @@ function toVersionchangeEvent(evt) {
 }
 
 function toDatabase(db) {
-    return {
+    return db;
+    /*return {
         name: db.name,
         version: db.version,
         handle: db
-    };
+    };*/
 }
 
 function toObjectStore(os) {
     return {
         name: os.name,
-        auto_increment: os.autoIncrement,
+        autoIncrement: os.autoIncrement,
         handle: os
     };
 }
@@ -633,7 +635,7 @@ function toObjectStore(os) {
 function toTransaction(t) {
     return {
         mode: toTransactionMode(t.mode),
-        object_store_names: _elm_lang$core$Native_List.fromArray(t.objectStoreNames),
+        objectStoreNames: _elm_lang$core$Native_List.fromArray(t.objectStoreNames),
         handle: t
     };
 }
@@ -642,8 +644,8 @@ function toKeyRange(kr) {
     return {
         lower: toMaybe(kr.lower),
         upper: toMaybe(kr.upper),
-        lower_open: kr.lowerOpen,
-        upper_open: kr.upperOpen,
+        lowerOpen: kr.lowerOpen,
+        upperOpen: kr.upperOpen,
         handle: kr
     };
 }
@@ -682,7 +684,7 @@ function fromCursorDirection(d) {
 function toIndex(idx) {
     return {
         name : idx.name,
-        multi_entry : idx.multiEntry,
+        multiEntry : idx.multiEntry,
         unique : idx.unique,
         handle: idx
     };

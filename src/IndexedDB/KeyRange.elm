@@ -23,8 +23,8 @@ import Native.IndexedDB
 type alias KeyRange k =
   { lower : Maybe k
   , upper : Maybe k
-  , lower_open : Bool
-  , upper_open : Bool
+  , lowerOpen : Bool
+  , upperOpen : Bool
   , handle : Json.Value
   }
 

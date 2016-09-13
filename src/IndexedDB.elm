@@ -33,8 +33,8 @@ stored in the client. It contains version information that enables calling
 code to perform database upgrades from old to new version.
 -}
 type alias VersionChangeEvent =
-  { old_version: Int
-  , new_version: Int
+  { oldVersion: Int
+  , newVersion: Int
   , timestamp: Time
   , db: Database
   , handle: Json.Value
