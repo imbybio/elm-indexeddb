@@ -38,7 +38,7 @@ If you want to cache data and don't need direct keyed access to values, use
 ## Is it ready yet?
 
 As mentioned above, this package is not ready for production yet. So here is a
-quick overview of what works and what doesn't
+quick overview of what works and what doesn't.
 
 ### The good
 
@@ -96,7 +96,7 @@ onVersionChange evt =
     Cmd.none
 ```
 
-One the database is open, you can add and retrieve items from it. Each time,
+Once the database is open, you can add and retrieve items from it. Each time,
 you need to handle success and error conditions as commands.
 
 > **Note**: When adding an item, you will get the key that the item was stored under
