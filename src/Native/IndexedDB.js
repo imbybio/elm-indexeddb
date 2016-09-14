@@ -17,23 +17,28 @@ function getIndexedDB() {
 function open(dbname, dbvsn, upgradeneededcallback)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var indexedDB = getIndexedDB();
+        try {
+            var indexedDB = getIndexedDB();
 
-        var req = indexedDB.open(dbname, dbvsn);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('blocked', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toBlockedEvent(evt)));
-        });
-        req.addEventListener('upgradeneeded', function(evt) {
-            upgradeneededcallback(toVersionchangeEvent(evt))
-            // TODO: handle the result of that function
-            // we should probably receive a command to pass to the scheduler
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toDatabase(req.result)));
-        });
+            var req = indexedDB.open(dbname, dbvsn);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('blocked', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toBlockedEvent(evt)));
+            });
+            req.addEventListener('upgradeneeded', function(evt) {
+                upgradeneededcallback(toVersionchangeEvent(evt))
+                // TODO: handle the result of that function
+                // we should probably receive a command to pass to the scheduler
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toDatabase(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -43,18 +48,23 @@ function open(dbname, dbvsn, upgradeneededcallback)
 function deleteDatabase(dbname)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var indexedDB = getIndexedDB();
+        try {
+            var indexedDB = getIndexedDB();
 
-        var req = indexedDB.deleteDatabase(dbname);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('blocked', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toBlockedEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed());
-        });
+            var req = indexedDB.deleteDatabase(dbname);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('blocked', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toBlockedEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed());
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -151,14 +161,19 @@ function transactionObjectStore(t, osname)
 function objectStoreAdd(os, item, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkey = fromMaybe(key);
-        var req = os.add(item, jkey);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
-        });
+        try {
+            var jkey = fromMaybe(key);
+            var req = os.add(item, jkey);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -168,14 +183,19 @@ function objectStoreAdd(os, item, key)
 function objectStorePut(os, item, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkey = fromMaybe(key);
-        var req = os.put(item, jkey);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
-        });
+        try {
+            var jkey = fromMaybe(key);
+            var req = os.put(item, jkey);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -185,13 +205,18 @@ function objectStorePut(os, item, key)
 function objectStoreDelete(os, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = os.delete(key);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(key));
-        });
+        try {
+            var req = os.delete(key);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(key));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -201,13 +226,18 @@ function objectStoreDelete(os, key)
 function objectStoreGet(os, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = os.get(key);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toMaybe(req.result)));
-        });
+        try {
+            var req = os.get(key);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toMaybe(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -217,17 +247,22 @@ function objectStoreGet(os, key)
 function objectStoreGetAll(os, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jcount = fromMaybe(count);
-        // TODO: check that this works even if jkr and/or jcount are null
-        var req = os.getAll(jkr, jcount);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(
-                _elm_lang$core$Native_List.fromArray(req.result)));
-        });
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jcount = fromMaybe(count);
+            // TODO: check that this works even if jkr and/or jcount are null
+            var req = os.getAll(jkr, jcount);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(
+                    _elm_lang$core$Native_List.fromArray(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -237,17 +272,22 @@ function objectStoreGetAll(os, keyRange, count)
 function objectStoreGetAllKeys(os, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jcount = fromMaybe(count);
-        // TODO: check that this works even if jkr and/or jcount are null
-        var req = os.getAllKeys(jkr, jcount);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(
-                _elm_lang$core$Native_List.fromArray(req.result)));
-        });
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jcount = fromMaybe(count);
+            // TODO: check that this works even if jkr and/or jcount are null
+            var req = os.getAllKeys(jkr, jcount);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(
+                    _elm_lang$core$Native_List.fromArray(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -257,15 +297,20 @@ function objectStoreGetAllKeys(os, keyRange, count)
 function objectStoreCount(os, keyRange)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        // TODO: check that this works even if jkr is null
-        var req = os.count(jkr);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
-        });
+        try {
+            var jkr = fromMaybe(keyRange);
+            // TODO: check that this works even if jkr is null
+            var req = os.count(jkr);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -275,13 +320,18 @@ function objectStoreCount(os, keyRange)
 function objectStoreClear(os)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = os.clear();
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed());
-        });
+        try {
+            var req = os.clear();
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed());
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -291,18 +341,23 @@ function objectStoreClear(os)
 function objectStoreOpenCursor(os, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jdir = fromMaybe(direction);
-        if (jdir != null) {
-            jdir = fromCursorDirection(jdir);
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jdir = fromMaybe(direction);
+            if (jdir != null) {
+                jdir = fromCursorDirection(jdir);
+            }
+            var req = os.openCursor(jkr, jdir);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+            });
         }
-        var req = os.openCursor(jkr, jdir);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
-        });
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -312,18 +367,23 @@ function objectStoreOpenCursor(os, keyRange, direction)
 function objectStoreOpenKeyCursor(os, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jdir = fromMaybe(direction);
-        if (jdir != null) {
-            jdir = fromCursorDirection(jdir);
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jdir = fromMaybe(direction);
+            if (jdir != null) {
+                jdir = fromCursorDirection(jdir);
+            }
+            var req = os.openKeyCursor(jkr, jdir);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+            });
         }
-        var req = os.openKeyCursor(jkr, jdir);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
-        });
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -332,12 +392,12 @@ function objectStoreOpenKeyCursor(os, keyRange, direction)
 
 function objectStoreCreateIndex(os, idxname, keyPath, idxopts)
 {
-    var jidxopts = {
-        multiEntry: idxopts.multiEntry,
-        unique: idxopts.unique
-    };
-    var jkeyPath = fromKeyPath(keyPath);
     try {
+        var jidxopts = {
+            multiEntry: idxopts.multiEntry,
+            unique: idxopts.unique
+        };
+        var jkeyPath = fromKeyPath(keyPath);
         return toOkResult(toIndex(os.createIndex(idxname, jkeyPath, jidxopts)));
     }
     catch(err) {
@@ -412,8 +472,8 @@ function cursorValue(cursor)
 
 function cursorAdvance(cursor, count)
 {
-    var jcount = fromMaybe(count);
     try {
+        var jcount = fromMaybe(count);
         if (jcount == null) {
             return toOkResult(fromCursor(cursor).advance());
         } else {
@@ -427,8 +487,8 @@ function cursorAdvance(cursor, count)
 
 function cursorContinue(cursor, key)
 {
-    var jkey = fromMaybe(key);
     try {
+        var jkey = fromMaybe(key);
         if (jkey == null) {
             return toOkResult(fromCursor(cursor).continue());
         } else {
@@ -443,13 +503,18 @@ function cursorContinue(cursor, key)
 function cursorDelete(cursor)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = fromCursor(cursor).delete();
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed());
-        });
+        try {
+            var req = fromCursor(cursor).delete();
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed());
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -459,13 +524,18 @@ function cursorDelete(cursor)
 function cursorUpdate(cursor, value)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = fromCursor(cursor).update(value);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed());
-        });
+        try {
+            var req = fromCursor(cursor).update(value);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed());
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -477,15 +547,20 @@ function cursorUpdate(cursor, value)
 function indexCount(idx, keyRange)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        // TODO: check that this works even if jkr is null
-        var req = idx.count(jkr);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
-        });
+        try {
+            var jkr = fromMaybe(keyRange);
+            // TODO: check that this works even if jkr is null
+            var req = idx.count(jkr);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -495,13 +570,18 @@ function indexCount(idx, keyRange)
 function indexGet(idx, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = idx.get(key);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toMaybe(req.result)));
-        });
+        try {
+            var req = idx.get(key);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toMaybe(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -511,17 +591,22 @@ function indexGet(idx, key)
 function indexGetAll(idx, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jcount = fromMaybe(count);
-        // TODO: check that this works even if jkr and/or jcount are null
-        var req = idx.getAll(jkr, jcount);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(
-                _elm_lang$core$Native_List.fromArray(req.result)));
-        });
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jcount = fromMaybe(count);
+            // TODO: check that this works even if jkr and/or jcount are null
+            var req = idx.getAll(jkr, jcount);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(
+                    _elm_lang$core$Native_List.fromArray(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -531,13 +616,18 @@ function indexGetAll(idx, keyRange, count)
 function indexGetKey(idx, key)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var req = idx.getKey(key);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
-        });
+        try {
+            var req = idx.getKey(key);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(req.result));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -547,17 +637,22 @@ function indexGetKey(idx, key)
 function indexGetAllKeys(idx, keyRange, count)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jcount = fromMaybe(count);
-        // TODO: check that this works even if jkr and/or jcount are null
-        var req = idx.getAllKeys(jkr, jcount);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(
-                _elm_lang$core$Native_List.fromArray(req.result)));
-        });
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jcount = fromMaybe(count);
+            // TODO: check that this works even if jkr and/or jcount are null
+            var req = idx.getAllKeys(jkr, jcount);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(
+                    _elm_lang$core$Native_List.fromArray(req.result)));
+            });
+        }
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -567,18 +662,23 @@ function indexGetAllKeys(idx, keyRange, count)
 function indexOpenCursor(idx, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jdir = fromMaybe(direction);
-        if (jdir != null) {
-            jdir = fromCursorDirection(jdir);
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jdir = fromMaybe(direction);
+            if (jdir != null) {
+                jdir = fromCursorDirection(jdir);
+            }
+            var req = idx.openCursor(jkr, jdir);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+            });
         }
-        var req = idx.openCursor(jkr, jdir);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
-        });
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
@@ -588,18 +688,23 @@ function indexOpenCursor(idx, keyRange, direction)
 function indexOpenKeyCursor(idx, keyRange, direction)
 {
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
-        var jkr = fromMaybe(keyRange);
-        var jdir = fromMaybe(direction);
-        if (jdir != null) {
-            jdir = fromCursorDirection(jdir);
+        try {
+            var jkr = fromMaybe(keyRange);
+            var jdir = fromMaybe(direction);
+            if (jdir != null) {
+                jdir = fromCursorDirection(jdir);
+            }
+            var req = idx.openKeyCursor(jkr, jdir);
+            req.addEventListener('error', function(evt) {
+                return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
+            });
+            req.addEventListener('success', function() {
+                return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
+            });
         }
-        var req = idx.openKeyCursor(jkr, jdir);
-        req.addEventListener('error', function(evt) {
-            return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
-        });
-        req.addEventListener('success', function() {
-            return callback(_elm_lang$core$Native_Scheduler.succeed(toCursor(req.result)));
-        });
+        catch(err) {
+            return callback(_elm_lang$core$Native_Scheduler.fail(toDomException(err)));
+        }
 
         return function() {
         };
