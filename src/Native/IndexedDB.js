@@ -185,6 +185,8 @@ function objectStorePut(os, item, key)
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
         try {
             var jkey = fromMaybe(key);
+            console.log("objectStorePut", "item", item);
+            console.log("objectStorePut", "jkey", jkey);
             var req = os.put(item, jkey);
             req.addEventListener('error', function(evt) {
                 return callback(_elm_lang$core$Native_Scheduler.fail(toErrorEvent(evt)));
