@@ -20,7 +20,7 @@ value succeeded.
 fromJson : Json.Decoder v -> Task RawError (Maybe Json.Value) -> Task Error (Maybe v)
 fromJson decoder result =
   mapError promoteError result
-    `andThen` (decodeJsonToTask decoder)
+    |> andThen (decodeJsonToTask decoder)
 
 decodeJsonToTask : Json.Decoder v -> Maybe Json.Value -> Task Error (Maybe v)
 decodeJsonToTask decoder m_value =
@@ -43,7 +43,7 @@ list succeeded.
 fromJsonList : Json.Decoder v -> Task RawError (List Json.Value) -> Task Error (List v)
 fromJsonList decoder result =
   mapError promoteError result
-    `andThen` (decodeJsonListToTask decoder)
+    |> andThen (decodeJsonListToTask decoder)
 
 decodeJsonListToTask : Json.Decoder v -> List Json.Value -> Task Error (List v)
 decodeJsonListToTask decoder values =

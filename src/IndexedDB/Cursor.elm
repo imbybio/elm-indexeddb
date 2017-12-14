@@ -19,8 +19,8 @@ module IndexedDB.Cursor exposing
 -}
 
 import Json.Decode as Json
-import Task exposing (Task, andThen, mapError, succeed, fail, fromResult)
-import IndexedDB.Error exposing(Error, RawError, promoteError)
+import Task exposing (Task, andThen, mapError, succeed, fail)
+import IndexedDB.Error exposing(Error, RawError, promoteError, formatError)
 import Native.IndexedDB
 
 {-| Cursor data structure.
@@ -61,7 +61,7 @@ value decoder cursor =
 -}
 advance : Int -> Cursor -> Result Error ()
 advance count cursor =
-  Result.formatError promoteError(
+  formatError promoteError(
     Native.IndexedDB.cursorAdvance cursor count
     )
 
@@ -70,7 +70,7 @@ no key is given, continue to the next item.
 -}
 continue : Maybe k -> Cursor -> Result Error ()
 continue key cursor =
-  Result.formatError promoteError(
+  formatError promoteError(
     Native.IndexedDB.cursorContinue cursor key
     )
 

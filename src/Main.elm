@@ -3,7 +3,6 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing(onClick, onInput)
-import Html.App as App
 import Json.Decode as Json
 import Task
 
@@ -16,8 +15,10 @@ import IndexedDB.ObjectStore as ObjectStore
 import IndexedDB.Error as Error
 import IndexedDB.KeyPath as KeyPath
 
+
+main : Program Never Model Msg
 main =
-  App.program
+  program
     { init = init
     , view = view
     , update = update
@@ -185,9 +186,8 @@ update msg model =
         Just db ->
           let
             r_os =
-              Result.andThen
-              (Database.transaction ["data"] Transaction.ReadOnly db)
-              (Transaction.objectStore "dummy")
+              Database.transaction ["data"] Transaction.ReadOnly db
+              |> Result.andThen (Transaction.objectStore "dummy")
           in
             case r_os of
               Result.Ok os ->
@@ -220,7 +220,7 @@ view model =
     [ input
       [ id "opendb"
       , name "opendb"
-      , type' "submit"
+      , type_ "submit"
       , value "Open DB"
       , disabled (if model.db == Nothing then False else True)
       , onClick (OpenDb "testdb" 1)
@@ -229,7 +229,7 @@ view model =
     , input
       [ id "badtrx"
       , name "badtrx"
-      , type' "submit"
+      , type_ "submit"
       , value "Bad Transaction"
       , disabled (if model.db == Nothing then True else False)
       , onClick BadTransaction
@@ -238,7 +238,7 @@ view model =
     , input
       [ id "bados"
       , name "bados"
-      , type' "submit"
+      , type_ "submit"
       , value "Bad Object Store"
       , disabled (if model.db == Nothing then True else False)
       , onClick BadObjectStore
@@ -247,7 +247,7 @@ view model =
     , input
       [ id "deletedb"
       , name "deletedb"
-      , type' "submit"
+      , type_ "submit"
       , value "Delete DB"
       , disabled False
       , onClick (DeleteDb "testdb")
@@ -258,7 +258,7 @@ view model =
       [ input
         [ id "data-entry"
         , name "data-entry"
-        , type' "text"
+        , type_ "text"
         , value model.data_entry_field
         , disabled (if model.db == Nothing then True else False)
         , onInput UpdateDataEntryField
@@ -267,7 +267,7 @@ view model =
       , input
         [ id "data-add"
         , name "data-add"
-        , type' "submit"
+        , type_ "submit"
         , value "Add"
         , disabled (if model.db == Nothing then True else False)
         , onClick (Add model.data_entry_field)
@@ -278,7 +278,7 @@ view model =
       [ input
         [ id "key-entry"
         , name "key-entry"
-        , type' "text"
+        , type_ "text"
         , value model.data_key_field
         , disabled (if model.db == Nothing then True else False)
         , onInput UpdateDataKeyField
@@ -287,7 +287,7 @@ view model =
       , input
         [ id "data-get"
         , name "data-get"
-        , type' "submit"
+        , type_ "submit"
         , value "Get"
         , disabled (if model.db == Nothing then True else False)
         , onClick (Get model.data_key_field)
@@ -318,7 +318,7 @@ viewObjectLine entry =
       [ input
         [ id ("delete-"++(toString entry.id))
         , name ("delete-"++(toString entry.id))
-        , type' "submit"
+        , type_ "submit"
         , value "Delete"
         , onClick (Delete entry.id)
         ]
@@ -336,11 +336,21 @@ subscriptions model =
 
 openDb : String -> Int -> Cmd Msg
 openDb dbname dbvsn =
-  Task.perform OpenDbOnError OpenDbOnSuccess (IndexedDB.open dbname dbvsn onVersionChange)
+  let
+    handler result = case result of
+      Err err -> OpenDbOnError err
+      Ok db -> OpenDbOnSuccess db
+  in
+    Task.attempt handler (IndexedDB.open dbname dbvsn onVersionChange)
 
 deleteDb : String -> Cmd Msg
 deleteDb dbname =
-  Task.perform DeleteDbOnError DeleteDbOnSuccess (IndexedDB.deleteDatabase dbname)
+  let
+    handler result = case result of
+      Err err -> DeleteDbOnError err
+      Ok _ -> DeleteDbOnSuccess ()
+  in
+    Task.attempt handler (IndexedDB.deleteDatabase dbname)
 
 onVersionChange : IndexedDB.VersionChangeEvent -> Cmd Msg
 onVersionChange evt =
@@ -354,38 +364,54 @@ addItem : String -> Database.Database -> Cmd Msg
 addItem value db =
   let
     r_os =
-      Result.andThen
-      (Database.transaction ["data"] Transaction.ReadWrite db)
-      (Transaction.objectStore "data")
+      Database.transaction ["data"] Transaction.ReadWrite db
+      |> Result.andThen (Transaction.objectStore "data")
+
+    handler = result AddOnError (AddOnSuccess value)
   in
-    Task.perform AddOnError (AddOnSuccess value) (
-      Task.fromResult r_os `Task.andThen` (ObjectStore.add value Nothing)
+    Task.attempt handler (
+      fromResult r_os |> Task.andThen (ObjectStore.add value Nothing)
       )
 
 deleteItem : Int -> Database.Database -> Cmd Msg
 deleteItem key db =
   let
     r_os =
-      Result.andThen
-      (Database.transaction ["data"] Transaction.ReadWrite db)
-      (Transaction.objectStore "data")
+      Database.transaction ["data"] Transaction.ReadWrite db
+      |> Result.andThen (Transaction.objectStore "data")
+
+    handler = result DeleteOnError DeleteOnSuccess
   in
-    Task.perform DeleteOnError DeleteOnSuccess (
-      Task.fromResult r_os `Task.andThen` (ObjectStore.delete key)
+    Task.attempt handler (
+      fromResult r_os |> Task.andThen (ObjectStore.delete key)
       )
 
 getItem : Int -> Database.Database -> Cmd Msg
 getItem key db =
   let
     r_os =
-      Result.andThen
-      (Database.transaction ["data"] Transaction.ReadOnly db)
-      (Transaction.objectStore "data")
+      Database.transaction ["data"] Transaction.ReadOnly db
+      |> Result.andThen (Transaction.objectStore "data")
+
+    handler = result GetOnError (GetOnSuccess key)
   in
-    Task.perform GetOnError (GetOnSuccess key) (
-      Task.fromResult r_os `Task.andThen` (ObjectStore.getString key)
+    Task.attempt handler (
+      fromResult r_os |> Task.andThen (ObjectStore.getString key)
       )
 
 decodeKey : String -> Result String Int
 decodeKey str =
   Json.decodeString Json.int str
+
+
+fromResult : Result e a -> Task.Task e a
+fromResult result =
+  case result of
+    Err err -> Task.fail err
+    Ok ok -> Task.succeed ok
+
+
+result : (e -> b) -> (a -> b) -> Result e a -> b
+result onErr onOk result_ = case result_ of
+  Err err -> onErr err
+  Ok okay -> onOk okay

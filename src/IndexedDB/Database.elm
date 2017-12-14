@@ -20,7 +20,7 @@ module IndexedDB.Database exposing
 import Json.Decode as Json
 import IndexedDB.ObjectStore exposing(ObjectStore, ObjectStoreOptions)
 import IndexedDB.Transaction exposing(Transaction, TransactionMode)
-import IndexedDB.Error exposing(Error, RawError, promoteError)
+import IndexedDB.Error exposing(Error, RawError, promoteError, formatError)
 import Native.IndexedDB
 
 {-| Database data structure.
@@ -43,7 +43,7 @@ of a call to `IndexedDB.open`.
 -}
 createObjectStore : String -> ObjectStoreOptions -> Database -> Result Error ObjectStore
 createObjectStore osname osopts db =
-  Result.formatError promoteError (
+  formatError promoteError (
     Native.IndexedDB.databaseCreateObjectStore db osname osopts
     )
 
@@ -54,7 +54,7 @@ of a call to `IndexedDB.open`.
 -}
 deleteObjectStore : String -> Database -> Result Error ()
 deleteObjectStore osname db =
-  Result.formatError promoteError (
+  formatError promoteError (
     Native.IndexedDB.databaseDeleteObjectStore db osname
     )
 
@@ -67,6 +67,6 @@ object store within that transaction context.
 -}
 transaction : List String -> TransactionMode -> Database -> Result Error Transaction
 transaction osnames mode db =
-  Result.formatError promoteError (
+  formatError promoteError (
     Native.IndexedDB.databaseTransaction db osnames mode
     )

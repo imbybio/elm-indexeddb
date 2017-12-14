@@ -24,8 +24,8 @@ module IndexedDB.ObjectStore exposing
 -}
 
 import Json.Decode as Json
-import Task exposing (Task, andThen, mapError, succeed, fail, fromResult)
-import IndexedDB.Error exposing(Error(..), RawError(..), promoteError)
+import Task exposing (Task, andThen, mapError, succeed, fail)
+import IndexedDB.Error exposing(Error(..), RawError(..), promoteError, formatError)
 import IndexedDB.KeyRange exposing(KeyRange)
 import IndexedDB.Cursor exposing(Cursor, Direction)
 import IndexedDB.Index exposing(Index, IndexOptions)
@@ -139,7 +139,7 @@ openKeyCursor key_range direction os =
 -}
 createIndex : String -> KeyPath -> IndexOptions -> ObjectStore -> Result Error Index
 createIndex name key_path options os =
-  Result.formatError promoteError (
+  formatError promoteError (
     Native.IndexedDB.objectStoreCreateIndex os name key_path options
     )
 
@@ -147,7 +147,7 @@ createIndex name key_path options os =
 -}
 deleteIndex : String -> ObjectStore -> Result Error ()
 deleteIndex name os =
-  Result.formatError promoteError (
+  formatError promoteError (
     Native.IndexedDB.objectStoreDeleteIndex os name
     )
 
@@ -155,6 +155,6 @@ deleteIndex name os =
 -}
 index : String -> ObjectStore -> Result Error Index
 index name os =
-  Result.formatError promoteError (
+  formatError promoteError (
     Native.IndexedDB.objectStoreIndex os name
     )
