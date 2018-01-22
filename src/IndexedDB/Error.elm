@@ -1,10 +1,10 @@
 module IndexedDB.Error exposing
-  ( Error(..), RawError(..), promoteError
+  ( Error(..), RawError(..), promoteError, formatError
   )
 
 {-| IndexedDB Error handling.
 
-@docs Error, RawError, promoteError
+@docs Error, RawError, promoteError, formatError
 -}
 
 import Json.Decode as Json
@@ -34,3 +34,12 @@ promoteError rawError =
     RawDomException code name -> BadRequest code name
     RawErrorEvent str -> ErrorEvent str
     RawBlockedEvent _ -> BlockedEvent
+
+
+{-| Map the error type of a result
+-}
+formatError : (e1 -> e2) -> Result e1 a -> Result e2 a
+formatError f r =
+  case r of
+    Ok x -> Ok x
+    Err err -> Err (f err)
